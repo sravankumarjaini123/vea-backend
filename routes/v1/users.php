@@ -77,4 +77,6 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     Route::get('user/{id}', [UserController::class, 'show'])->name('user.show')->middleware(['role:users,1']);
 
+    Route::get('user/notifications/{id}', [UserController::class, 'notifications'])->name('users.notifications');
+
 });

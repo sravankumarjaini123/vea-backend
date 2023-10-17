@@ -571,6 +571,49 @@ class UserController extends Controller
     } // End Function
 
     /**
+     * Method allow to reteive the all the notifications of the particular user
+     * @param $id
+     * @return JsonResponse
+     */
+    public function notifications($id):JsonResponse
+    {
+        try {
+            if(User::where('id',$id)->exists()){
+                $user = User::where('id',$id)->first();
+                $user_notifications = $user->notifications()->latest()->get();
+                $result_notifications = array();
+                foreach ($user_notifications as $user_notification){
+                    $result_notifications[] = [
+                        'data_id' => $user_notification->data_id,
+                        'data_name' => $user_notification->data_name,
+                        'notification_type' => $user_notification->notification_type,
+                        'data_channel' => $user_notification->data_channel,
+                        'status' => $user_notification->status,
+                        'error_message' => $user_notification->error_message,
+                        'updated_at' => $user_notification->updated_at,
+                    ];
+                }
+                return response()->json([
+                    'notificationDetails' => $result_notifications,
+                    'status' => 'success',
+                ], 200);
+
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'There is no relevant information for selected query',
+                ], 210);
+            }
+        } catch (Exception $exception)
+        {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
+    /**
      * Method allow to generate codes for Emails
      * @param $email
      * @param $table

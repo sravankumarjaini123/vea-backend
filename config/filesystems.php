@@ -58,6 +58,20 @@ return [
             'visibility' => 'public',
         ],
 
+        'editedMedia' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/editedMedia'),
+            'url' => env('APP_URL').'/storage/editedMedia',
+            'visibility' => 'public',
+        ],
+
+        'volumeEditedMedia' => [
+            'driver' => 'local',
+            'root' => storage_path().'/volume/mnt/'.env('DISK_VOLUME').'/editedMedia',
+            'url' => env('APP_URL').'volume/editedMedia',
+            'visibility' => 'public',
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

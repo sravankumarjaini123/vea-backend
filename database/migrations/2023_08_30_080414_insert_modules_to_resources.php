@@ -20,6 +20,10 @@ return new class extends Migration
             'name' => 'Partners',
             'slug' => 'partners',
         ]);
+        DB::table('resources')->insert([
+            'name' => 'File Manager',
+            'slug' => 'file-manager',
+        ]);
     }
 
     /**
