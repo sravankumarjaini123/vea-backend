@@ -7,6 +7,7 @@ use App\Http\Controllers\Client\SalutationController;
 use App\Http\Controllers\Client\TitleController;
 use App\Http\Controllers\Users\AuthenticationController;
 use App\Http\Controllers\Client\CountryController;
+use App\Http\Controllers\Client\LanguageController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -17,25 +18,41 @@ use App\Http\Controllers\Client\CountryController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::group(['middleware' => 'log.entry'], function () {
 
-Route::prefix('v1')->group(function () {
+    Route::prefix('v1')->group(function () {
 
-    require __DIR__ . '/v1/users.php';
+        require __DIR__ . '/v1/users.php';
 
-    require __DIR__ . '/v1/rolesAndPermissions.php';
+        require __DIR__ . '/v1/rolesAndPermissions.php';
 
-    require __DIR__ . '/v1/partners.php';
+        require __DIR__ . '/v1/partners.php';
 
-    require __DIR__ . '/v1/emails.php';
+        require __DIR__ . '/v1/emails.php';
 
-    require __DIR__ . '/v1/labels.php';
+        require __DIR__ . '/v1/labels.php';
 
-    require __DIR__ . '/v1/sectors.php';
+        require __DIR__ . '/v1/sectors.php';
 
-    require  __DIR__ . '/v1/contacts.php';
+        require __DIR__ . '/v1/contacts.php';
 
-    require __DIR__ . '/v1/newsletters.php';
+        require __DIR__ . '/v1/newsletters.php';
 
+        require __DIR__ . '/v1/categories.php';
+
+        require __DIR__ . '/v1/groups.php';
+
+        require __DIR__ . '/v1/tags.php';
+
+        require __DIR__ . '/v1/legalTexts.php';
+
+        require __DIR__ . '/v1/fileManagement.php';
+
+        require __DIR__ . '/v1/authors.php';
+
+        require __DIR__ . '/v1/system.php';
+
+    });
 });
 
 Route::group(['middleware' => config('fortify.middleware', ['web']),'prefix' => 'v1/client'], function () {
@@ -48,6 +65,9 @@ Route::group(['middleware' => config('fortify.middleware', ['web']),'prefix' => 
 
     Route::get('titles',[TitleController::class, 'index'])->name('api.titles.index');
 
+    Route::get('v1/client/languages', [LanguageController::class, 'index']);
+
     Route::post('refreshToken', [AuthenticationController::class, 'issueToken'])->name('api.client.refreshToken');
+
 
 });
