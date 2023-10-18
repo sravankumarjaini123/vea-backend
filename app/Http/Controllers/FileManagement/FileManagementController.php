@@ -43,7 +43,7 @@ class FileManagementController extends Controller
                 ->orderBy('name')
                 ->get();
             $files = $this->getFileDetails($files_db);
-            $total_size = FoldersFiles::sum('size');
+            $total_size = FoldersFiles::whereNull('store_type')->sum('size');
             $items = FoldersFiles::whereNull('store_type')->get();
             $items_count = $items->count();
 
@@ -118,7 +118,7 @@ class FileManagementController extends Controller
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function storeFile(Request $request):JsonResponse
+    public function  storeFile(Request $request):JsonResponse
     {
         try {
             $request->validate([
@@ -641,11 +641,11 @@ class FileManagementController extends Controller
             if($storage) {
                 Storage::disk($disk)->delete($file->hash_name);
                 FoldersFiles::where('id', $file->id)->delete();
-                $resolution_files = FoldersFiles::where('optim_parent_id', $file->id)->get();
+                $resolution_files = FoldersFiles::where('optimized_parent_id', $file->id)->get();
                 foreach ($resolution_files as $resolution_file){
                     Storage::disk($disk)->delete($resolution_file->hash_name);
                 }
-                FoldersFiles::where('optim_parent_id', $file->id)->delete();
+                FoldersFiles::where('optimized_parent_id', $file->id)->delete();
             }
             return response()->json([
                 'status' => 'Success',
@@ -952,7 +952,7 @@ class FileManagementController extends Controller
                         // Change the status of the file
                         $file->optimizing_status = 'processing';
                         $file->save();
-                        $exiting_files = FoldersFiles::where('optim_parent_id', $file->id)->get();
+                        $exiting_files = FoldersFiles::where('optimized_parent_id', $file->id)->get();
                         if (!$exiting_files->isEmpty()) {
                             foreach ($exiting_files as $existing_file) {
                                 $storage = Storage::disk($disk)->exists($existing_file->hash_name);
@@ -960,7 +960,7 @@ class FileManagementController extends Controller
                                     Storage::disk($disk)->delete($existing_file->hash_name);
                                 }
                             }
-                            FoldersFiles::where('optim_parent_id', $file->id)->delete();
+                            FoldersFiles::where('optimized_parent_id', $file->id)->delete();
                         }
                         $notifications_id = DB::table('notifications')->insertGetId([
                             'data_id' => $file->id,
@@ -1043,7 +1043,7 @@ class FileManagementController extends Controller
                     $file->optimizing_status = 'processing';
                     $file->save();
                     if (Storage::disk($disk)->exists($file->hash_name)) {
-                        $exiting_files = FoldersFiles::where('optim_parent_id', $file->id)->get();
+                        $exiting_files = FoldersFiles::where('optimized_parent_id', $file->id)->get();
                         if (!$exiting_files->isEmpty()){
                             foreach ($exiting_files as $existing_file){
                                 $storage = Storage::disk($disk)->exists($existing_file->hash_name);
@@ -1051,7 +1051,7 @@ class FileManagementController extends Controller
                                     Storage::disk($disk)->delete($existing_file->hash_name);
                                 }
                             }
-                            FoldersFiles::where('optim_parent_id', $file->id)->delete();
+                            FoldersFiles::where('optimized_parent_id', $file->id)->delete();
                         }
                         ImageOptimization::dispatch($file->id, $notifications_id, $type)->delay(now()->addSeconds($count_seconds));
                         $count_seconds += 3;

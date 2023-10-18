@@ -97,4 +97,20 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Partners::class, 'partners_id');
     }
+
+    /**
+     * Get the Profile Photo of the User.
+     */
+    public function profilePhoto()
+    {
+        return $this->belongsTo(FoldersFiles::class);
+    }
+
+    /**
+     * Get the Notifications Triggered by the User
+     */
+    public function notifications()
+    {
+        return $this->belongsToMany(Notifications::class, 'users_notifications', 'users_id', 'notifications_id');
+    }
 }

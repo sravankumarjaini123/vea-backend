@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
+use Laravel\Passport\RefreshToken;
+use Laravel\Passport\Token;
 use Nette\Schema\ValidationException;
 
 class ContactController extends Controller
@@ -206,8 +208,7 @@ class ContactController extends Controller
                     'address_2' => $customer_detail->address_2,
                     'zip_code' => $customer_detail->zip_code,
                     'city' => $customer_detail->city,
-                    'state' => $customer_detail->state,
-                    'countries_id' => $customer_detail->countries_id,
+                    'country_id' => $customer_detail->country_id,
                     'country' => $customer_detail->country->name,
                     'country_emoji' => $customer_detail->country->emoji,
                 ];
@@ -271,7 +272,7 @@ class ContactController extends Controller
     public function show($id): JsonResponse
     {
         try {
-            if (User::where('id', $id)->exists()) {
+            if (User::where('id', $id)->where('sys_admin', 0)->where('sys_customer', 1)->exists()) {
                 $customer_details = User::with(['userLogins'])->where('id', $id)->first();
                 $result = $this->getContactDetails($customer_details, 'usershow');
                 return response()->json([
@@ -430,7 +431,6 @@ class ContactController extends Controller
                     'city' => $user_personal->city,
                     'country_id' => $user_personal->country_id,
                     'country' => $user_personal->country->name,
-                    'state' => $user_personal->state,
                 ];
                 return response()->json([
                     'personalAddress' => $user_personal_details,
@@ -511,13 +511,13 @@ class ContactController extends Controller
 
                     $company_detail = $user->company()->first();
                     $company_address = [
-                        'code' => $company_detail->company_code,
+                        'code' => $company_detail->code,
                         'name' => $company_detail->name,
-                        'email' => $company_detail->email,
+                        'email' => $company_detail->billing_send_email,
                         'VAT' => $company_detail->VAT,
                         'tax_number' => $company_detail->tax_number,
-                        'address_1' => $company_detail->address_1,
-                        'address_2' => $company_detail->address_2,
+                        'address_1' => $company_detail->street,
+                        'address_2' => $company_detail->street_extra,
                         'zip_code' => $company_detail->zip_code,
                         'city' => $company_detail->city,
                         'country_id' => $company_detail->countries_id,
@@ -587,7 +587,6 @@ class ContactController extends Controller
                             'zip_code' => $request->zip_code,
                             'city' => $request->city,
                             'country_id' => $request->country_id,
-                            'state_id' => $request->state_id,
                         ]);
                         $updated_company = Partners::where('company_code',$request->company_code)->first();
                         $company_address = [
@@ -602,7 +601,6 @@ class ContactController extends Controller
                             'city' => $updated_company->city,
                             'country_id' => $updated_company->country_id,
                             'country' => $updated_company->country->name,
-                            'state_id' => $updated_company->state_id,
                         ];
                         return response()->json([
                             'companyDetails' => $company_address,
@@ -903,29 +901,22 @@ class ContactController extends Controller
             if (User::where('id',$id)->where('sys_admin', 0)->where('sys_customer', 1)->exists()) {
                 $user = User::where('id', $id)->first();
 
-                //Destroy old media file
-                $file_name = $user->profile_photo_url;
-                if(!empty($file_name)) {
-                    $delete_file = $this->destroyMediaFile($file_name);
+                if ($request->profile_photo_id == null) {
+                    $profile_photo_id = $user->profile_photo_id;
+                } else {
+                    $profile_photo_id = $request->profile_photo_id;
                 }
-
-                // Store  requested media file
-                if(!empty($request->profile_photo) && $request->hasFile('profile_photo')) {
-                    $hash_name = $this->storeMediaFile($request->profile_photo, 'contact_profile_photo');
-                    $user->profile_photo_url = $hash_name ?? null;
-                    $user->save();
-                }
-
-                $user = User::where('id', $id)->first();
-                $get_media_file = null;
-                $url = URL::to('/');
-                if(!empty($user->profile_photo_url)) {
-                    $get_media_file = $url . '/storage/media/' . $user->profile_photo_url;
+                $user->profile_photo_id = $profile_photo_id;
+                $user->save();
+                if ($user->profile_photo_id != null) {
+                    $profile_photo_url = $user->profilePhoto->file_path;
+                } else {
+                    $profile_photo_url = null;
                 }
 
                 $result = [
                     'id' => $id,
-                    'profile_photo_url' => $get_media_file,
+                    'profile_photo_url' => $profile_photo_url,
                 ];
                 return response()->json([
                     'contactDetails' => $result,
@@ -989,5 +980,53 @@ class ContactController extends Controller
             ], 500);
         }
     } //End function
+
+    /**
+     * Method allow to DeActivate the Account for the App.
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function deactivateContact():JsonResponse
+    {
+        try {
+            $user = Auth::guard('api')->user();
+            if (!empty($user)) {
+                if ($user->sys_admin == 0 && $user->sys_customer == 1) {
+                    $tokens =  $user->tokens->pluck('id');
+                    if (!empty($tokens)) {
+                        Token::whereIn('id', $tokens)
+                            ->update(['revoked' => true]);
+
+                        RefreshToken::whereIn('access_token_id', $tokens)->update(['revoked' => true]);
+                        $accessToken = Auth::guard('api')->user()->tokens->each(function ($token, $key) {
+                            $token->delete();
+                        });
+                    }
+                    // Delete the Contact
+                    User::where('id',$user->id)->delete();
+
+                    return response()->json([
+                        'status' => 'Success',
+                        'message' => 'Account has been deactivated Successfully',
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'status' => 'Error',
+                        'message' => 'Cannot Deactivate the Account system Admin through App'
+                    ], 422);
+                }
+            } else {
+                return response()->json([
+                    'status' => 'No Content',
+                    'message' => 'There is no relevant information for selected query'
+                ], 210);
+            }
+        } catch (Exception $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
 
 }

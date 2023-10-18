@@ -102,6 +102,8 @@ Route::group(['middleware' => ['auth:api']], function () {
         Route::post('doubleOptIn/email/{id}', [AuthenticateController::class, 'doubleOptInConfirmationMail'])->name('contact.doubleOptIn.confirmation');
         /* END -- Double OptIn */
 
+        Route::delete('deactivate', [ContactController::class, 'deactivateContact'])->name('contacts.deactivate')->middleware(['role:contacts,3']);
+
     });
 
     /* END -- CUSTOMER */

@@ -20,6 +20,8 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     Route::get('partners/{id}',[PartnersController::class, 'show'])->name('partners.show')->middleware(['role:partners,1']);
 
+    Route::get('partners/contacts/{id}', [PartnersController::class, 'getContacts'])->name('partners.contacts')->middleware(['role:partners,1']);
+
     Route::group(['prefix' => 'partners'], function () {
 
         Route::post('filter', [PartnersController::class, 'getFilterPartners'])->name('partners.filter')->middleware(['role:partners,1']);

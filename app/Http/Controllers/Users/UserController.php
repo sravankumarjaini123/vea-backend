@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
+use Laravel\Passport\RefreshToken;
+use Laravel\Passport\Token;
 use Nette\Schema\ValidationException;
 use App\Jobs\SendPasswordsAndRegistrationsMails;
 
@@ -255,11 +257,10 @@ class UserController extends Controller
                     'name' => $users_role->name,
                 ];
             }
-
-            $file_path = null;
-            if(!empty($user->profile_photo_url)) {
-                $url = URL::to('/');
-                $file_path = $url. '/storage/media/' .$user->profile_photo_url;
+            if ($user->profile_photo_id != null) {
+                $profile_photo_url = $user->profilePhoto->file_path;
+            } else {
+                $profile_photo_url = null;
             }
 
             $userDetails = [
@@ -272,7 +273,8 @@ class UserController extends Controller
                 'lastname' => $user->lastname,
                 'email' => $user->email,
                 'username' => $user->username,
-                'profile_photo_url' => $file_path,
+                'profile_photo_id' => $user->profile_photo_id,
+                'profile_photo_url' => $profile_photo_url,
                 'has2FA' => $has2FA,
                 'sys_admin' => $user->sys_admin,
                 'sys_customer' => $user->sys_customer,
@@ -293,7 +295,8 @@ class UserController extends Controller
     public function updateEmail(Request $request, $id):JsonResponse
     {
         try {
-            $user = DB::table('users')->where('id',$id)->first();
+            $auth_user = Auth::guard('api')->user();
+            $user = User::where('id',$id)->first();
             $request->validate([
                 'email' => ['required','email','string', Rule::unique('users', 'email')->ignore($user->id)],
                 'confirm_password' => 'required',
@@ -309,6 +312,8 @@ class UserController extends Controller
                         ];
                         User::where('id',$id)->update($email);
                         $updatedEmail = User::where('id',$id)->first();
+                        // After changing if the User is same then User need to logout.
+                        $this->revokeAndDeleteTokens($user);
                         return response()->json([
                             'email' => $updatedEmail->email,
                             'status' => 'success',
@@ -343,6 +348,28 @@ class UserController extends Controller
     } // End Function
 
     /**
+     * Method allow to revoke the existing token and delete them
+     * @param $user
+     * @return bool
+     */
+    public function revokeAndDeleteTokens($user):bool
+    {
+        $tokens =  $user->tokens->pluck('id');
+        if (!$tokens->isEmpty()){
+            // REVOKE - TOKENS
+            Token::whereIn('id', $tokens)
+                ->update(['revoked' => true]);
+            RefreshToken::whereIn('access_token_id', $tokens)->update(['revoked' => true]);
+
+            // DELETE - TOKENS
+            Auth::guard('api')->user()->tokens->each(function ($token, $key){
+                $token->delete();
+            });
+        }
+        return true;
+    } // End Function
+
+    /**
      * Method allow to update the new password.
      * @param Request $request
      * @param $id
@@ -364,11 +391,6 @@ class UserController extends Controller
                     ];
                     User::where('id', $id)->update($password);
 
-                    return response()->json([
-                        'status' => 'success',
-                        'message' => 'The password has changed Successfully',
-                    ], 200);
-
                 } else {
                     $request->validate([
                         'current_password' => 'required',
@@ -382,17 +404,8 @@ class UserController extends Controller
                             'password' => Hash::make($request->password)
                         ];
                         User::where('id', $id)->update($password);
-                        // Logout the User from all logged-in devices
-                        $tokens =  $user->tokens->pluck('id');
-                        if (!empty($tokens)) {
-                            Auth::guard('api')->user()->tokens->each(function ($token, $key) {
-                                $token->delete();
-                            });
-                        }
-                        return response()->json([
-                            'status' => 'success',
-                            'message' => 'The password has changed Successfully',
-                        ], 200);
+                        $this->revokeAndDeleteTokens($user);
+
                     } else {
                         return response()->json([
                             'status' => 'error',
@@ -400,6 +413,11 @@ class UserController extends Controller
                         ], 203);
                     }
                 }
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'The password has changed Successfully',
+                ], 200);
             } else {
                 return response()->json([
                     'status' => 'error',
@@ -437,23 +455,10 @@ class UserController extends Controller
                 ]);
             }
             if ($user) {
-                $file_name = $user->profile_photo_url;
-                if($request->removeProfilePhoto == 'true') {
-                    if(!empty($file_name)) {
-                        $delete_file = $this->destroyMediaFile($file_name);
-                    }
-                    $profile_photo = null;
+                if ($request->profile_photo_id == null) {
+                    $profile_photo_id = $user->profile_photo_id;
                 } else {
-                    if( $request->hasFile('profile_photo') ) {
-                        if(!empty($file_name)) {
-                            $delete_file = $this->destroyMediaFile($file_name);
-                        }
-                        $media = $request->profile_photo;
-                        $hash_name = $this->storeMediaFile($media, $request->profile_photo);
-                        $profile_photo = $hash_name;
-                    } else {
-                        $profile_photo = $user->profile_photo_url;
-                    }
+                    $profile_photo_id = $request->profile_photo_id;
                 }
 
                 $personalDetails = [
@@ -462,7 +467,7 @@ class UserController extends Controller
                     'firstname' => $request->first_name,
                     'lastname' => $request->last_name,
                     'username' => $request->username,
-                    'profile_photo_url' => $profile_photo
+                    'profile_photo_id' => $profile_photo_id
                 ];
                 User::where('id', $id)->update($personalDetails);
                 $updatedUser = User::where('id',$id)->first();
@@ -471,12 +476,12 @@ class UserController extends Controller
                 } else {
                     $title = null;
                 }
-
-                $file_path = null;
-                $url = URL::to('/');
-                if(!empty($updatedUser->profile_photo_url)) {
-                    $file_path = $url. '/storage/media/' .$updatedUser->profile_photo_url;
+                if ($updatedUser->profile_photo_id != null) {
+                    $profile_photo_url = $updatedUser->profilePhoto->file_path;
+                } else {
+                    $profile_photo_url = null;
                 }
+
                 $user_details = [
                     'salutation_id' => $updatedUser->salutations_id,
                     'salutation' => $updatedUser->salutation->salutation,
@@ -485,7 +490,8 @@ class UserController extends Controller
                     'first_name' => $updatedUser->firstname,
                     'last_name'=> $updatedUser->lastname,
                     'username' => $updatedUser->username,
-                    'profile_photo_url' => $file_path,
+                    'profile_photo_id' => $user->profile_photo_id,
+                    'profile_photo_url' => $profile_photo_url,
                 ];
                 return response()->json([
                     'userDetails' => $user_details,

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Partners;
 
+use App\Http\Controllers\Contacts\ContactController;
 use App\Http\Controllers\Controller;
 use App\Models\FoldersFiles;
 use App\Models\IndustriesSectors;
@@ -39,7 +40,7 @@ class PartnersController extends Controller
             } else {
                 $limit = (int)$request->limit;
             }
-            $partners = Partners::where('id','!=',1);
+            $partners = Partners::where('code', '!=', null);
             if ($request->search_keyword != null){
                 $keyword = $request->search_keyword;
                 $partners = $partners->where(function ($query) use ($keyword) {
@@ -74,53 +75,39 @@ class PartnersController extends Controller
     {
         try {
             if (Partners::where('id', $id)->exists()) {
-                $partners = Partners::where('id',$id)->first();
                 $request->validate([
                     'type' => 'required|in:logo_rectangle,logo_square',
                     'store_type' =>  'required|string',
                     'file' => 'required'
                 ]);
                 $media = $request->file;
-
-                if($request->type == 'logo_rectangle') {
-                    $file_name = $partners->logo_rectangle_file_id;
-                } else {
-                    $file_name = $partners->logo_square_file_id;
-                }
-
-                //Delete old media file from disk
-                if(!empty($file_name)) {
-                    $delete_file = $this->destroyMediaFile($file_name);
-                }
-
-                //Store new media file from requested data
-                $hash_name = $this->storeMediaFile($media, $request->store_type);
-
-                $file_path = null;
-                $url = URL::to('/');
-
-                if ($request->type == 'logo_rectangle') {
-                    $partners->logo_rectangle_file_id = (!empty($request->file)) ? $hash_name : null;
-                    $partners->save();
-                } else {
-                    $partners->logo_square_file_id = (!empty($request->file)) ? $hash_name : null;
-                    $partners->save();
-                }
-
+                $edited_logo_id = $this->storeTempFile($media, $request->store_type);
                 $partners = Partners::where('id',$id)->first();
-                $logo_square = null;
-                $logo_rectangle = null;
-                if(!empty($partners->logo_square_file_id)) {
-                    $logo_square = $url. '/storage/media/' .$partners->logo_square_file_id;
+                if ($request->type == 'logo_rectangle') {
+                    $partners->logo_rectangle_file_id = $edited_logo_id;
+                    $partners->save();
+                    if ($partners->logo_rectangle_file_id != null) {
+                        $partner_logo_rectangle_url = $partners->partnerRectangleLogo->file_path;
+                    } else {
+                        $partner_logo_rectangle_url = null;
+                    }
+                    $partner_details = [
+                        'id' => $id,
+                        'logo_rectangle_url' => $partner_logo_rectangle_url
+                    ];
+                } else {
+                    $partners->logo_square_file_id = $edited_logo_id;
+                    $partners->save();
+                    if ($partners->logo_square_file_id != null) {
+                        $partner_logo_square_url = $partners->partnerSquareLogo->file_path;
+                    } else {
+                        $partner_logo_square_url = null;
+                    }
+                    $partner_details = [
+                        'id' => $id,
+                        'logo_square_url' => $partner_logo_square_url
+                    ];
                 }
-                if(!empty($partners->logo_rectangle_file_id)) {
-                    $logo_rectangle = $url. '/storage/media/' .$partners->logo_rectangle_file_id;
-                }
-                $partner_details = [
-                    'id' => $partners->id,
-                    'logo_square_url' => (!empty($partners->logo_square_file_id)) ? $logo_square : null,
-                    'logo_rectangle_url' => (!empty($partners->logo_rectangle_file_id)) ? $logo_rectangle : null,
-                ];
                 return response()->json([
                     'partnerDetails' => $partner_details,
                     'message' => 'Success',
@@ -418,6 +405,38 @@ class PartnersController extends Controller
     } // End Function
 
     /**
+     * Method allow to show all contacts for the respective partner
+     * @param $id
+     * @return JsonResponse
+     * @throws ValidationException
+     */
+    public function getContacts($id):JsonResponse
+    {
+        try {
+            if (Partners::where('id',$id)->exists()) {
+                $partner = Partners::where('id', $id)->first();
+                $partner_contacts = $partner->users()->get();
+                $contacts = new ContactController();
+                $contact_details = $contacts->getContactDetailsOverview($partner_contacts);
+                return response()->json([
+                    'partnerDetails' => $contact_details,
+                    'status' => 'Success',
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 'No Content',
+                    'message' => 'There is no relevant information for selected query'
+                ],210);
+            }
+        } catch (Exception $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
+    /**
      * Method allow get the list of single Partner of all Partners.
      * @param $partners
      * @return array
@@ -432,7 +451,7 @@ class PartnersController extends Controller
                 $partners_labels = $this->getPartnersDetails($partner->partnersLabels);
                 $partners_sectors = $this->getPartnersDetails($partner->partnersIndustriesSectors);
 
-                if ($partner->country_id != null){
+                if ($partner->countries_id != null){
                     $country_name = $partner->country->name;
                     $country_emoji = $partner->country->emoji;
                 } else {
@@ -440,17 +459,16 @@ class PartnersController extends Controller
                     $country_emoji = null;
                 }
 
-                $file_path = null;
-                $url = URL::to('/');
-                $logo_square = null;
-                $logo_rectangle = null;
-
-                // Get media from storage disks
-                if(!empty($partner->logo_square_file_id)) {
-                    $logo_square = $url. '/storage/media/' .$partner->logo_square_file_id;
+                // Logos
+                if ($partner->logo_rectangle_file_id != null) {
+                    $partner_logo_rectangle_url = $partner->partnerRectangleLogo->file_path;
+                } else {
+                    $partner_logo_rectangle_url = null;
                 }
-                if(!empty($partner->logo_rectangle_file_id)) {
-                    $logo_rectangle = $url. '/storage/media/' .$partner->logo_rectangle_file_id;
+                if ($partner->logo_square_file_id != null) {
+                    $partner_logo_square_url = $partner->partnerSquareLogo->file_path;
+                } else {
+                    $partner_logo_square_url = null;
                 }
 
                 // Response Array
@@ -462,7 +480,7 @@ class PartnersController extends Controller
                     'address_2' => $partner->street_extra,
                     'zip_code' => $partner->zip_code,
                     'city' => $partner->city,
-                    'country_id' => $partner->country_id,
+                    'country_id' => $partner->countries_id,
                     'country_name' => $country_name,
                     'country_emoji' => $country_emoji,
                     'tax_number' => $partner->tax_number,
@@ -473,8 +491,8 @@ class PartnersController extends Controller
                     'billing_email' => $partner->billing_send_email,
                     'payment_target_days' => $partner->payment_target_days,
                     'notes' => $partner->notes,
-                    'logo_square_url' => (!empty($partner->logo_square_file_id)) ? $logo_square : null,
-                    'logo_rectangle_url' => (!empty($partner->logo_rectangle_file_id)) ? $logo_rectangle : null,
+                    'logo_rectangle_url' => $partner_logo_rectangle_url,
+                    'logo_square_url' => $partner_logo_square_url,
                     'labels' => $partners_labels,
                     'industries_sectors' => $partners_sectors,
                     'created_by' => $partner->created_by,
@@ -651,10 +669,10 @@ class PartnersController extends Controller
                 $partners->street_extra = $request->address_2;
                 $partners->zip_code = $request->zip_code;
                 $partners->city = $request->city;
-                $partners->country_id = $request->country_id;
+                $partners->countries_id = $request->country_id;
                 $partners->save();
 
-                if ($partners->country_id != null) {
+                if ($partners->countries_id != null) {
                     $country_name = $partners->country->name;
                     $country_emoji = $partners->country->emoji;
                 } else {
@@ -669,7 +687,7 @@ class PartnersController extends Controller
                     'address_2' => $partners->street_extra,
                     'zip_code' => (int)$partners->zip_code,
                     'city' => $partners->city,
-                    'country_id' => $partners->country_id,
+                    'country_id' => (int)$partners->countries_id,
                     'country_name' => $country_name,
                     'country_emoji' => $country_emoji,
                 ];

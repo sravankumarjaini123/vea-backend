@@ -168,4 +168,67 @@ class Controller extends BaseController
         return $result;
     } // End Function
 
+    /**
+     * Method allow to compile all the resolutions of the files and use according the needs
+     * @param $id
+     * @return array
+     */
+    public function getFilesResolutionDetails($id):array
+    {
+        $result_array = array();
+        $resolution_files = FoldersFiles::where('optimized_parent_id', $id)->get();
+        if (!$resolution_files->isEmpty()) {
+            foreach ($resolution_files as $resolution_file) {
+                $result_array[] = [
+                    'resolution' => $resolution_file->resolution,
+                    'file_url' => $resolution_file->file_path,
+                ];
+            }
+        }
+        return $result_array;
+    }
+
+    /**
+     * Method allow to store the temporary files in to the system only for the edited purpose
+     * @param $media
+     * @param $store_type
+     * @return int
+     */
+    public function storeTempFile($media, $store_type)
+    {
+        $url = URL::to('/');
+        File::delete(public_path('storage'));
+        if (env('DISK_DRIVER') === 'mounted') {
+            Config::set('filesystems.links.'.public_path('storage'), storage_path().'/volume/mnt/'.env('DISK_VOLUME'));
+            symlink(storage_path().'/volume/mnt/'.env('DISK_VOLUME'), public_path('storage'));
+            // Artisan::call('storage:link');
+            $destination_path = '';
+        } else {
+            Artisan::call('storage:link');
+            $destination_path = 'public/editedMedia';
+        }
+        $name = $media->getClientOriginalName();
+        $filename = pathinfo($name, PATHINFO_FILENAME);
+        $size = $media->getSize();
+        $type = $media->extension();
+        $hash_name = $media->hashName();
+        $file_path = $url. '/storage/editedMedia/' .$hash_name;
+        if (env('DISK_DRIVER') === 'mounted'){
+            $path = $media->storeAs($destination_path, $hash_name, 'volumeEditedMedia');
+        } else {
+            $path = $media->storeAs($destination_path, $hash_name);
+        }
+        $edited_logo_id = DB::table('folders_files')->insertGetId([
+            'folders_id' => null,
+            'name' => $filename,
+            'size' => $size,
+            'type' => $type,
+            'hash_name' => $hash_name,
+            'file_path' => $file_path,
+            'store_type' => $store_type,
+            'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        ]);
+        return $edited_logo_id;
+    }
+
 }

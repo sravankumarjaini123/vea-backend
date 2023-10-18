@@ -103,7 +103,7 @@ class AuthenticationController extends Controller
                             'tokenDetails' => $token_contents,
                             'userDetails' => $userDetails,
                             'status' => 'Success',
-                            'message' => 'Welcome to Meyer-Koldingen, Explore our new features.',
+                            'message' => 'Welcome to our System, Explore our new features.',
                         ], 200);
                     } else {
                         $user_details = [

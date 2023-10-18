@@ -28,7 +28,7 @@ class Partners extends Model
      */
     public function country(): BelongsTo
     {
-        return $this->belongsTo(Countries::class, 'country_id');
+        return $this->belongsTo(Countries::class, 'countries_id');
     }
 
     /**
@@ -56,4 +56,21 @@ class Partners extends Model
     {
         return $this->hasMany(User::class, 'partners_id');
     }
+
+    /**
+     * Method allow to get Rectangle logo of the Partner
+     */
+    public function partnerRectangleLogo()
+    {
+        return $this->belongsTo(FoldersFiles::class,'logo_rectangle_file_id');
+    }
+
+    /**
+     * Method allow to get Square logo of the Partner
+     */
+    public function partnerSquareLogo()
+    {
+        return $this->belongsTo(FoldersFiles::class,'logo_square_file_id');
+    }
+
 } // End class

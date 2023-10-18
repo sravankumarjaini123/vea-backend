@@ -170,6 +170,12 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\FortifyServiceProvider::class,
         App\Providers\JetstreamServiceProvider::class,
+
+        /*
+        * Image Optimization class for the Resizing thr Images
+        */
+        Intervention\Image\ImageServiceProvider::class,
+
     ])->toArray(),
 
     /*
@@ -185,6 +191,8 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        // Image Facade
+        'Image' => Intervention\Image\Facades\Image::class
     ])->toArray(),
 
 ];

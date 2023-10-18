@@ -17,9 +17,9 @@ class UsersSeeder extends Seeder
     {
         DB::table('users')->insert([
             'salutations_id' => 1,
-            'firstname' => 'Meyer',
-            'lastname' => 'Koldingen',
-            'email' => 'welcome@meyerkoldingen.de',
+            'firstname' => 'VEA',
+            'lastname' => 'software',
+            'email' => 'welcome@vea.de',
             'password' => '$2y$10$1kMgvePAU2SYGG729xacBOswSRojKLQpZ4WmdUCYpBYoWadhaHtdK',
             'sys_admin' => 1,
             'sys_customer' => 1,
