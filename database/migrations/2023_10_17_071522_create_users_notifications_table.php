@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::hasTable('notifications')) {
-            Schema::dropIfExists('notifications');
+        if (Schema::hasTable('users_notifications')) {
+            Schema::dropIfExists('users_notifications');
         }
 
         Schema::create('users_notifications', function (Blueprint $table) {
             $table->unsignedBigInteger('users_id')->unsigned();
             $table->unsignedBigInteger('notifications_id')->unsigned();
+
             $table->foreign('users_id')->references('id')->on('users')
                 ->onDelete('cascade')->onUpdate('cascade');
             $table->foreign('notifications_id')->references('id')->on('notifications')

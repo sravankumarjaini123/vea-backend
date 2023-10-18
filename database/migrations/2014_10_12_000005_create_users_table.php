@@ -18,7 +18,7 @@ return new class extends Migration
 
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('salutations_id')->nullable(false);
+            $table->unsignedBigInteger('salutations_id')->nullable();
             $table->unsignedBigInteger('titles_id')->nullable();
             $table->string('firstname');
             $table->string('lastname');
@@ -29,7 +29,7 @@ return new class extends Migration
             $table->boolean('sys_admin')->default(0)->nullable(false);
             $table->boolean('sys_customer')->default(0)->nullable(false);
             $table->rememberToken();
-            $table->unsignedBigInteger('profile_photo_id', 2048)->nullable();
+            $table->unsignedBigInteger('profile_photo_id')->nullable();
             $table->dateTime('last_login_at')->nullable();
             $table->timestamps();
 

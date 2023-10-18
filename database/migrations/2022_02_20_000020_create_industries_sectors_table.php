@@ -14,6 +14,10 @@ class CreateIndustriesSectorsTable extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('industries_sectors')) {
+            Schema::dropIfExists('industries_sectors');
+        }
+
         Schema::create('industries_sectors', function (Blueprint $table) {
 
             $table->id();

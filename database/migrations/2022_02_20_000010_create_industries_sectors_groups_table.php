@@ -15,6 +15,10 @@ class CreateIndustriesSectorsGroupsTable extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('industries_sectors_groups')) {
+            Schema::dropIfExists('industries_sectors_groups');
+        }
+
         Schema::create('industries_sectors_groups', function (Blueprint $table) {
             $table->id();
             $table->string('name', 255)->unique();
@@ -23,14 +27,6 @@ class CreateIndustriesSectorsGroupsTable extends Migration
             $table->charset = 'utf8mb4';
             $table->collation = 'utf8mb4_general_ci';
         });
-
-        //Create resource for Industries sectors groups module
-        if (!Resources::where('name', 'Industries & Sectors	')->exists()){
-            Resources::insert([
-                'name' => 'Industries & Sectors',
-                'slug' => 'industries_sectors',
-            ]);
-        }
     }
 
     /**

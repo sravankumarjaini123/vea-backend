@@ -25,14 +25,6 @@ class CreateLabelsTable extends Migration
             $table->integer('display_order');
             $table->timestamps();
         });
-
-        //Create resource for Labels module
-        if (!Resources::where('name', 'Labels')->exists()){
-            Resources::insert([
-                'name' => 'Labels',
-                'slug' => 'labels',
-            ]);
-        }
     }
 
     /**

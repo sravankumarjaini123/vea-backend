@@ -18,7 +18,7 @@ return new class extends Migration
 
         Schema::create('authors', function (Blueprint $table) {
             $table->id();
-            $table->integer('profile_photo_id')->nullable()->unsigned();
+            $table->unsignedBigInteger('profile_photo_id')->nullable();
             $table->boolean('active')->default(0);
             $table->unsignedBigInteger('salutations_id');
             $table->unsignedBigInteger('titles_id')->nullable();

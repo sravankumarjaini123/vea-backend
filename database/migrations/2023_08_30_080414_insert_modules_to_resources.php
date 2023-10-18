@@ -13,6 +13,16 @@ return new class extends Migration
     public function up(): void
     {
         DB::table('resources')->insert([
+            'name' => 'Industries & Sectors',
+            'slug' => 'industries_sectors',
+        ]);
+
+        DB::table('resources')->insert([
+            'name' => 'Labels',
+            'slug' => 'labels',
+        ]);
+
+        DB::table('resources')->insert([
             'name' => 'Roles and Permissions',
             'slug' => 'roles-and-permissions',
         ]);
