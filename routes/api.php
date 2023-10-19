@@ -59,6 +59,8 @@ Route::group(['middleware' => 'log.entry'], function () {
 
         require __DIR__ . '/v1/twitter.php';
 
+        require __DIR__ . '/v1/posts.php';
+
     });
 });
 
