@@ -548,7 +548,7 @@ class LegalTextController extends Controller
         try {
             if (LegalTexts::where('version_id',$version_id)->exists()){
                 $legal = LegalTexts::where('version_id', $version_id)->first();
-                $this->destroyRelations($legal);
+                // $this->destroyRelations($legal);
                 $legal_texts = LegalTexts::where('version_id',$version_id)->delete();
                 return response()->json([
                     'status' => 'Success',
@@ -597,7 +597,7 @@ class LegalTextController extends Controller
                 {
                     $legal = LegalTexts::where('version_id', $legal_text_id)
                         ->where('is_published',1)->where('is_active',1)->first();
-                    $this->destroyRelations($legal);
+                    // $this->destroyRelations($legal);
                     $legal_text = LegalTexts::where('version_id', $legal_text_id)->delete();
                 }
                 return response()->json([
@@ -735,6 +735,12 @@ class LegalTextController extends Controller
         }
     } // End Function
 
+    /**
+     * Method allow to retrieve the information globally for the active legal Texts
+     * @param $id // Technically it is version_id
+     * @return JsonResponse
+     * @throws ValidationException
+     */
     public function showDetailWithId($id):JsonResponse
     {
         try {

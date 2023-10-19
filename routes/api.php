@@ -8,6 +8,7 @@ use App\Http\Controllers\Client\TitleController;
 use App\Http\Controllers\Users\AuthenticationController;
 use App\Http\Controllers\Client\CountryController;
 use App\Http\Controllers\Client\LanguageController;
+use App\Http\Controllers\LegalTexts\LegalTextController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -66,6 +67,8 @@ Route::group(['middleware' => config('fortify.middleware', ['web']),'prefix' => 
     Route::get('titles',[TitleController::class, 'index'])->name('api.titles.index');
 
     Route::get('v1/client/languages', [LanguageController::class, 'index']);
+
+    Route::get('system/legalTexts/{id}', [LegalTextController::class, 'showDetailWithId'])->name('legalTexts.show.Detail.id');
 
     Route::post('refreshToken', [AuthenticationController::class, 'issueToken'])->name('api.client.refreshToken');
 
