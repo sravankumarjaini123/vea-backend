@@ -5,8 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Wordpress extends Model
+class UsersLinkedIns extends Model
 {
     use HasFactory;
-    protected $table = 'wordpress';
 }

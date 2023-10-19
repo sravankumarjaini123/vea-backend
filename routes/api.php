@@ -53,6 +53,12 @@ Route::group(['middleware' => 'log.entry'], function () {
 
         require __DIR__ . '/v1/system.php';
 
+        require __DIR__ . '/v1/wordpress.php';
+
+        require __DIR__ . '/v1/linkedIn.php';
+
+        require __DIR__ . '/v1/twitter.php';
+
     });
 });
 

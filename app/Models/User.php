@@ -113,4 +113,16 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Notifications::class, 'users_notifications', 'users_id', 'notifications_id');
     }
+
+    public function twitter()
+    {
+        return $this->belongsToMany(Twitters::class, 'users_twitters', 'users_id', 'twitters_id')
+            ->withPivot(['id', 'twitter_user_id', 'username', 'access_token', 'token_type', 'profile_picture_url', 'refresh_token', 'auth_type', 'auth_id', 'shareable_password', 'created_at']);
+    }
+
+    public function linkedIn()
+    {
+        return $this->belongsToMany(LinkedIns::class, 'users_linkedins', 'users_id', 'linkedins_id')
+            ->withPivot(['linkedin_user_id','organisation_id', 'username', 'profile_picture_url', 'access_token', 'refresh_token', 'token_type']);
+    }
 }

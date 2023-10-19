@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Schema;
 
 class Kernel extends ConsoleKernel
 {
@@ -13,6 +14,12 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
+        $schedule->command('passport:purge')->daily();
+
+        // Twitter - RefreshToken
+        if (Schema::hasTable('users_twitters')) {
+            $schedule->command('twitter:refreshToken')->everyMinute();
+        }
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FoldersFiles;
 use Carbon\Carbon;
+use Illuminate\Encryption\Encrypter;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 class Controller extends BaseController
 {
@@ -229,6 +231,30 @@ class Controller extends BaseController
             'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
         ]);
         return $edited_logo_id;
+    } // End Function
+
+    /**
+     * Method allow to crypt the random string by its own key for safety
+     * @param $method
+     * @param $string
+     * @param $secret_key
+     * @return string
+     */
+    public function cryptRandomString($method, $string, $secret_key):string
+    {
+        $config = 'aes-256-cbc';
+        // see if the key starts with 'base64:'
+        if (Str::startsWith($key = $secret_key, 'base64:')) {
+            // decode the key
+            $key = base64_decode(substr($key, 7));
+        }
+        $encrypter = new Encrypter($key, $config);
+        if ($method == 'encrypt'){
+            $cryptedString = $encrypter->encryptString($string);
+        } else {
+            $cryptedString = $encrypter->decryptString($string);
+        }
+        return $cryptedString;
     }
 
 }
