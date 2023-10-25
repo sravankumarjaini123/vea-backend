@@ -108,14 +108,4 @@ Route::group(['middleware' => ['auth:api']], function () {
     /* END -- POSTS */
 });
 
-Route::get('posts/channels/subscribe/event/{id}',[JobStatusNotificationController::class, 'statusNotification'])
-    ->name('posts.wordpress.events')->middleware(['cors']);
-
 Route::get('posts/{id}/{channel?}/{contacts?}',[PostController::class, 'show'])->name('posts.show');
-
-Route::post('posts/checkout/sessions/{id}', [StripeProductController::class, 'getCheckoutDetailsForWebAndApp'])->name('posts.products.getCheckoutURL');
-
-Route::post('posts/checkout/paymentIntent/{id}', [StripeProductController::class, 'getCheckoutDetailsForWebAndApp'])->name('posts.products.getPaymentIntent');
-
-Route::post('posts/checkout/offers/{id}', [StripeOfferController::class, 'getCheckoutOfferForPostsAndCourses'])->name('posts.products.getCheckoutOffer');
-

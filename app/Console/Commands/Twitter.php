@@ -19,14 +19,14 @@ class Twitter extends Command
      *
      * @var string
      */
-    protected $signature = 'app:twitter';
+    protected $signature = 'twitter:refreshToken';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Artisan command to check for expiry of access token and gets the refresh token';
 
     /**
      * Execute the console command.

@@ -253,8 +253,8 @@ class PostController extends Controller
 
                 // Channels
                 // $wordpress_channels = $this->getWordpressDetails($post->wordpress);
-                // $twitter_details = $this->getTwitterDetails($post->twitter);
-                // $linkedIn_details = $this->getLinkedInDetails($post->linkedIn);
+                $twitter_details = $this->getTwitterDetails($post->twitter);
+                $linkedIn_details = $this->getLinkedInDetails($post->linkedIn);
 
                 // Related Posts
                 if (empty($post->related_posts)) {
@@ -673,7 +673,7 @@ class PostController extends Controller
         } catch (Exception $exception) {
             return response()->json([
                 'status' => 'Error',
-                'message' => $exception->getLine(),
+                'message' => $exception->getMessage(),
             ], 500);
         }
     } // End Function
