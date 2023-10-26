@@ -597,7 +597,7 @@ class FileManagementController extends Controller
             if (FoldersFiles::where('id',$id)->exists()){
                 // Check the wordpress sites are existing or not and continue
                 $wordpress = Wordpress::all();
-                if (!empty($wordpress)){
+                if (!$wordpress->isEmpty()){
                     $sync = new FileSyncController();
                     $delete = $sync->deleteSyncFile($id);
                 }
