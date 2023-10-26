@@ -37,7 +37,7 @@ class Twitter extends Command
             if (Schema::hasTable('users_twitters')) {
                 $client = new Client();
                 $users_twitters = DB::table('users_twitters')->get();
-                if (!empty($users_twitters)) {
+                if (!$users_twitters->isEmpty()) {
                     foreach ($users_twitters as $users_twitter) {
                         $user_details = UsersTwitters::where('id', $users_twitter->id)
                             ->where('auth_type', 'new')->where('auth_id', null)
