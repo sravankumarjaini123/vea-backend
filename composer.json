@@ -16,6 +16,7 @@
         "laravel/passport": "^11.8",
         "laravel/sanctum": "^3.2",
         "laravel/tinker": "^2.8",
+        "staudenmeir/laravel-adjacency-list": "^1.13",
         "swiftmailer/swiftmailer": "^5.4",
         "tightenco/ziggy": "^1.0"
     },
