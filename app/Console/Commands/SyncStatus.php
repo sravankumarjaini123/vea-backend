@@ -23,7 +23,7 @@ class SyncStatus extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Artisan command to check the status of Notifications and stop the process if it is timed out';
 
     /**
      * Execute the console command.

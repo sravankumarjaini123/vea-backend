@@ -140,7 +140,7 @@ class TagController extends Controller
 
                 // Check the WordPress sites are existing or not and continue
                 $wordpress = Wordpress::all();
-                if (!empty($wordpress)){
+                if (!$wordpress->isEmpty()){
                     $sync = new TagSyncController();
                     $sync->updateSyncTag($id);
                 }

@@ -542,7 +542,7 @@ class PartnersController extends Controller
             }
             $partners = Partners::where('id', '!=', 1);
             if ($request->country_id != null) {
-                $partners = $partners->where('country_id', '=', $request->country_id);
+                $partners = $partners->where('countries_id', '=', $request->country_id);
             }
             if ($request->city != null) {
                 $request->validate(['city' => 'nullable|string|min:3|max:200']);
@@ -661,7 +661,7 @@ class PartnersController extends Controller
                 $partners = Partners::where('id', $id)->first();
                 $request->validate([
                     'name' => ['required', 'string', Rule::unique('partners', 'name')->ignore($partners->id)],
-                    'zip_code' => 'integer',
+                    'zip_code' => 'nullable|integer',
                 ]);
 
                 $partners->name = $request->name;
