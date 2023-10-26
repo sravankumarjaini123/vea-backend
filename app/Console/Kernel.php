@@ -25,6 +25,11 @@ class Kernel extends ConsoleKernel
         if (Schema::hasTable('posts')) {
             $schedule->command('post:update')->everyMinute();
         }
+
+        // Logs - Scheduler
+        if (Schema::hasTable('notifications')) {
+            $schedule->command('sync:status')->everyMinute();
+        }
     }
 
     /**

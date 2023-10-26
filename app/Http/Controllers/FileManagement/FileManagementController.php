@@ -399,7 +399,7 @@ class FileManagementController extends Controller
                         ]);
                         // Check the wordpress sites are existing or not and continue
                         $wordpress = Wordpress::all();
-                        if (!empty($wordpress)){
+                        if (!$wordpress->isEmpty()){
                             $sync = new FileSyncController();
                             $update = $sync->updateSyncFile($id);
                         }
