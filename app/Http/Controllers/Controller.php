@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categories;
 use App\Models\FoldersFiles;
+use App\Models\Groups;
+use App\Models\Tags;
 use Carbon\Carbon;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -133,7 +136,45 @@ class Controller extends BaseController
             }
         }
         return true;
-    }
+    } // End Function
+
+    /**
+     * Method allow get the array of filter options for posts Master data
+     * @param $model
+     * @param $data
+     * @param $condition
+     * @return array
+     */
+    public function postsMasterData($model, $data, $condition):array
+    {
+        $post_ids = array();
+        $data_ids = json_decode($data);
+        foreach ($data_ids as $data_id){
+            if ($model == 'groups'){
+                $groups = Groups::where('id', $data_id)->first();
+                if (!empty($groups)) {
+                    $post_ids[] = $groups->posts->pluck('id')->toArray();
+                }
+            } elseif ($model == 'categories'){
+                $categories = Categories::where('id', $data_id)->first();
+                if (!empty($categories)) {
+                    $post_ids[] = $categories->posts->pluck('id')->toArray();
+                }
+            } else {
+                $tags = Tags::where('id', $data_id)->first();
+                if (!empty($tags)) {
+                    $post_ids[] = $tags->posts->pluck('id')->toArray();
+                }
+            }
+        }
+        if ($condition == 'and'){
+            $post_condition_group = call_user_func_array('array_intersect', $post_ids);
+        } else {
+            $post_condition_group = call_user_func_array('array_merge',$post_ids);
+            $post_condition_group = array_unique($post_condition_group);
+        }
+        return $post_condition_group;
+    } // End Function
 
     /**
      * Method allow to get all the details of the MasterData and display
