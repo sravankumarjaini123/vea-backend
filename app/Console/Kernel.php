@@ -20,6 +20,11 @@ class Kernel extends ConsoleKernel
         if (Schema::hasTable('users_twitters')) {
             $schedule->command('twitter:refreshToken')->everyMinute();
         }
+
+        // Posts - Scheduler
+        if (Schema::hasTable('posts')) {
+            $schedule->command('post:update')->everyMinute();
+        }
     }
 
     /**
