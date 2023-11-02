@@ -252,7 +252,7 @@ class PostController extends Controller
                 }
 
                 // Channels
-                // $wordpress_channels = $this->getWordpressDetails($post->wordpress);
+                $wordpress_channels = $this->getWordpressDetails($post->wordpress);
                 $twitter_details = $this->getTwitterDetails($post->twitter);
                 $linkedIn_details = $this->getLinkedInDetails($post->linkedIn);
 
@@ -266,7 +266,6 @@ class PostController extends Controller
                         ->get();
                     $related_posts = $this->getRelatedPostsDetails($related_posts_details, $channel);
                 }
-
 
                 // Final Array of Post with all details
                 $post_details[] = [

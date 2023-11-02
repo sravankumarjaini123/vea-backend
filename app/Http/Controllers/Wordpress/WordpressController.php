@@ -170,6 +170,7 @@ class WordpressController extends Controller
                 $wordpress->site_url . '/wp-json/wp/v2/posts?per_page='.$request->per_page. '&offset='.$request->offset,
                 ['headers' => $this->headers])
                 ->getBody());
+            // dd($posts);
             $this->postsImport($posts, $wordpress, $klima_category_id, $bp_category_id, $group_id);
             // dd($posts);
             // $get_posts = Posts::where('shareable_type', 'wordpress')->where('shareable_posts', '!=', null)->get();
@@ -319,7 +320,7 @@ class WordpressController extends Controller
                         'created_at' => Carbon::now()->format('Y-m-d H:i:s')
                     ]);
                 } else {
-                    $folder_id = Folders::where('name', 'Wordpress');
+                    $folder_id = Folders::where('name', 'Wordpress')->first()->id;
                 }
                 $file_id = FoldersFiles::insertGetId([
                     'folders_id' => $folder_id,
