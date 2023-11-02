@@ -88,8 +88,6 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     Route::group(['prefix' =>'contact'],function () {
 
-        Route::get('deleteContactProfilePhoto/{id}', [ContactController::class, 'deleteContactPhoto'])->name('contact.deletephoto');
-
         Route::get('profile', [ContactController::class, 'contactProfile']);
 
         Route::get('{id}', [ContactController::class, 'show'])->name('contact.show')->middleware(['role:contacts,1']);
