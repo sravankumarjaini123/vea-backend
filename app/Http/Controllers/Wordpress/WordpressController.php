@@ -170,9 +170,9 @@ class WordpressController extends Controller
                 $wordpress->site_url . '/wp-json/wp/v2/posts?per_page='.$request->per_page. '&offset='.$request->offset,
                 ['headers' => $this->headers])
                 ->getBody());
-            dd($posts);
+
             $this->postsImport($posts, $wordpress, $klima_category_id, $bp_category_id, $group_id);
-            // dd($posts);
+
             // $get_posts = Posts::where('shareable_type', 'wordpress')->where('shareable_posts', '!=', null)->get();
             return response()->json([
                 'message' => 'Success',
