@@ -2167,6 +2167,9 @@ class PostController extends Controller
             if ($post_condition_final != null){
                 $posts = $posts->whereIn('id', $post_condition_final);
             }
+            if ($post_condition_final == null && ($request->groups != null || $request->categories != null || $request->tags != null)) {
+                $posts = $posts->whereIn('id', []);
+            }
             if ($request->limit == null){
                 $limit = 10;
             } else {

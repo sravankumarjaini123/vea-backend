@@ -79,4 +79,5 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     Route::get('user/notifications/{id}', [UserController::class, 'notifications'])->name('users.notifications');
 
+    Route::delete('users/{id}', [UserController::class, 'destroy'])->name('users.destroy')->middleware(['role:users,4']);
 });

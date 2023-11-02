@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Users;
 
+use App\Http\Controllers\ActiveCampaigns\ActiveCampaignAccountController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Partners\PartnersController;
 use App\Models\EmailsSettings;
@@ -806,6 +807,46 @@ class UserController extends Controller
                     'status' => 'Error',
                     'message' => 'There is some issue for reset of your password, Please process again',
                 ], 422);
+            }
+        } catch (Exception $exception)
+        {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
+    /**
+     * Method allow to delete the system User
+     * @param $id
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function destroy($id):JsonResponse
+    {
+        try {
+            if (User::where('id',$id)->exists()) {
+                $user = User::where('id', $id)->first();
+                $tokens =  $user->tokens->pluck('id');
+                Token::whereIn('id', $tokens)
+                    ->update(['revoked' => true]);
+
+                RefreshToken::whereIn('access_token_id', $tokens)->update(['revoked' => true]);
+                $accessToken = $user->tokens->each(function ($token, $key){
+                    $token->delete();
+                });
+                User::where('id',$id)->delete();
+
+                return response()->json([
+                    'status' => 'Success',
+                    'message' => 'The User is removed successfully',
+                ],200);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'There is no relevant information for selected query',
+                ], 210);
             }
         } catch (Exception $exception)
         {

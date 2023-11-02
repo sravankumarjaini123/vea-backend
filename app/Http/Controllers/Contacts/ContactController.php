@@ -166,17 +166,15 @@ class ContactController extends Controller
     {
         $result_array = array();
         if (!empty($customer_detail)) {
-            $contactDetails = array();
             if ($customer_detail->titles_id != null) {
                 $title = $customer_detail->title->title;
             } else {
                 $title = null;
             }
-
-            $profile_photo_url = null;
-            $url = URL::to('/') . '/storage/media/';
-            if($customer_detail->profile_photo_url != null) {
-                $profile_photo_url = $url . $customer_detail->profile_photo_url;
+            if ($customer_detail->profile_photo_id != null) {
+                $profile_photo_url = $customer_detail->profilePhoto->file_path;
+            } else {
+                $profile_photo_url = null;
             }
 
             $user_label_details = $customer_detail->labels;
@@ -196,6 +194,7 @@ class ContactController extends Controller
                 'sys_customer' => $customer_detail->sys_customer,
                 'is_blocked' => $customer_detail->is_blocked,
                 'verification_status' => $customer_detail->verification_status,
+                'profile_photo_id' => $customer_detail->profile_photo_id,
                 'profile_photo_url' => $profile_photo_url,
                 'created_at' => $customer_detail->created_at,
                 'labels' => $user_labels,
