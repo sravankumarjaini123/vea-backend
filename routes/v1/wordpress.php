@@ -16,7 +16,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     /* BEGIN -- GROUPS */
     Route::get('wordpress',[WordpressController::class, 'index'])->name('wordpress.index')->middleware(['role:wordpress,1']);
 
-    Route::post('wordpress/posts', [WordpressController::class, 'wordpressPosts'])->name('wordpress.posts');
+    // Route::post('wordpress/posts', [WordpressController::class, 'wordpressPosts'])->name('wordpress.posts');
 
     Route::post('wordpress',[WordpressController::class, 'store'])->name('wordpress.store')->middleware(['role:wordpress,2']);
 
