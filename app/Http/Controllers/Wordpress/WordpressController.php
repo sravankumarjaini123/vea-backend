@@ -127,9 +127,6 @@ class WordpressController extends Controller
     {
         try {
             // Master Data
-            $klima_category_id = null;
-            $bp_category_id = null;
-            $group_id = null;
             if (!Groups::where('name', 'Klimafreundlicher Mittelstand')->exists()) {
                 $order_number = Groups::max('display_order');
                 $group_id = Groups::insertGetId([
@@ -137,6 +134,8 @@ class WordpressController extends Controller
                     'display_order' => $order_number + 1,
                     'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 ]);
+            } else {
+                $group_id = Groups::where('name', 'Klimafreundlicher Mittelstand')->first()->id;
             }
             if (!Groups::where('name', 'VEA')->exists()) {
                 $order_number = Groups::max('display_order');
@@ -153,6 +152,8 @@ class WordpressController extends Controller
                     'display_order' => $order_number + 1,
                     'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 ]);
+            } else {
+                $klima_category_id = Categories::where('name', 'Klima News')->first()->id;
             }
             if (!Categories::where('name', 'Best Practise')->exists()) {
                 $order_number = Categories::max('display_order');
@@ -161,6 +162,8 @@ class WordpressController extends Controller
                     'display_order' => $order_number + 1,
                     'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 ]);
+            } else {
+                $bp_category_id = Categories::where('name', 'Best Practise')->first()->id;
             }
 
             $wordpress = Wordpress::all()->first();
