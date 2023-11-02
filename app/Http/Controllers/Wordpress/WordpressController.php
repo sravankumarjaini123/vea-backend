@@ -205,8 +205,12 @@ class WordpressController extends Controller
             if (!empty($posts)) {
                 foreach ($posts as $post) {
                     if (!Posts::where('title', $post->title->rendered)->exists()) {
-                        $store_file = $this->importMediaFilesFromWordpress($post->featured_media);
-                        $file_id = $store_file->getData()->file_id;
+                        if ($post->featured_media != null) {
+                            $store_file = $this->importMediaFilesFromWordpress($post->featured_media);
+                            $file_id = $store_file->getData()->file_id;
+                        } else {
+                            $file_id = null;
+                        }
                         if ($post->status == 'publish') {
                             $status_id = 2;
                         } elseif ($post->status == 'draft') {
