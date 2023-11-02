@@ -83,11 +83,10 @@ class ContactController extends Controller
                 } else {
                     $title = null;
                 }
-
-                $profile_photo_url = null;
-                $url = URL::to('/') . '/storage/media/';
-                if ($contact->profile_photo_url != null) {
-                    $profile_photo_url = $url . $contact->profile_photo_url;
+                if ($contact->profile_photo_id != null) {
+                    $profile_photo_url = $contact->profilePhoto->file_path;
+                } else {
+                    $profile_photo_url = null;
                 }
 
                 if ($contact->two_factor_secret != null) {
@@ -137,6 +136,7 @@ class ContactController extends Controller
                     'has2FA' => $has2FA,
                     'labels' => $user_labels,
                     'is_blocked' => $contact->is_blocked,
+                    'profile_photo_id' => $contact->profile_photo_id,
                     'profile_photo_url' => $profile_photo_url,
                     'last_login' => $contact->last_login,
                     'personalAddress' => [

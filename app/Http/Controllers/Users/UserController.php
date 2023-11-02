@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Users;
 
-use App\Http\Controllers\ActiveCampaigns\ActiveCampaignAccountController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Partners\PartnersController;
 use App\Models\EmailsSettings;
