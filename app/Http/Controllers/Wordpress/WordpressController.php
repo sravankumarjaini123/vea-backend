@@ -170,7 +170,7 @@ class WordpressController extends Controller
                 $wordpress->site_url . '/wp-json/wp/v2/posts?per_page='.$request->per_page. '&offset='.$request->offset,
                 ['headers' => $this->headers])
                 ->getBody());
-            // dd($posts);
+            dd($posts);
             $this->postsImport($posts, $wordpress, $klima_category_id, $bp_category_id, $group_id);
             // dd($posts);
             // $get_posts = Posts::where('shareable_type', 'wordpress')->where('shareable_posts', '!=', null)->get();
@@ -218,7 +218,7 @@ class WordpressController extends Controller
                             'title' => $post->title->rendered,
                             'introduction' => $post->excerpt->rendered,
                             'description' => $post->content->rendered,
-                            'post_type' => $post->format,
+                            'post_type' => 'image',
                             'post_file_id' => $file_id,
                             'status_id' => $status_id,
                             'published_at' => $post->date,
