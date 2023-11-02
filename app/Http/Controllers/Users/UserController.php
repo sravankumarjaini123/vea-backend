@@ -263,6 +263,39 @@ class UserController extends Controller
                 $profile_photo_url = null;
             }
 
+            // Connected Accounts
+            $connected_accounts = array();
+            $twitter = array();
+            if (!empty($user_twitters)) {
+                foreach ($user_twitters as $user_twitter) {
+                    if (!empty($user_twitter->id)) {
+                        $twitter[] = [
+                            'id' => $user_twitter->id,
+                            'app_name' => $user_twitter->app_name,
+                            'username' => $user_twitter->pivot->username,
+                            'profile_picture_url' => $user_twitter->pivot->profile_picture_url,
+                            'auth_type' => $user_twitter->pivot->auth_type,
+                            'shareable_password' => $user_twitter->pivot->shareable_password,
+                            'user_twitter_detail_id' => $user_twitter->pivot->id,
+                            'auth_id' => $user_twitter->pivot->auth_id,
+                        ];
+                    }
+                }
+            }
+            $user_linkedIns = $user->linkedIn;
+            $linkedIn = array();
+            if (!empty($user_linkedIns)) {
+                foreach ($user_linkedIns as $user_linkedIn) {
+                    $linkedIn[] = [
+                        'id' => $user_linkedIn->id,
+                        'app_name' => $user_linkedIn->app_name,
+                        'username' => $user_linkedIn->pivot->username,
+                        'profile_picture_url' => $user_linkedIn->pivot->profile_picture_url,
+                    ];
+                }
+            }
+            $connected_accounts = array_merge($connected_accounts, ['twitter' => $twitter], ['linkedIn' => $linkedIn]);
+
             $userDetails = [
                 'id' => $user->id,
                 'salutation_id' => $user->salutations_id,
@@ -278,6 +311,7 @@ class UserController extends Controller
                 'has2FA' => $has2FA,
                 'sys_admin' => $user->sys_admin,
                 'sys_customer' => $user->sys_customer,
+                'connected_accounts' => $connected_accounts,
                 'role' => $role_details,
                 'last_login' => $user->last_login_at,
             ];
