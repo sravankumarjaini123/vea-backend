@@ -61,6 +61,18 @@ Route::group(['middleware' => 'log.entry'], function () {
 
         require __DIR__ . '/v1/posts.php';
 
+        require __DIR__ . '/v1/fundingStates.php';
+
+        require __DIR__ . '/v1/fundingRequirements.php';
+
+        require __DIR__ . '/v1/fundingBodies.php';
+
+        require __DIR__ . '/v1/fundingEligibilities.php';
+
+        require __DIR__ . '/v1/fundingTypes.php';
+
+        require __DIR__ . '/v1/fundingSubjects.php';
+
     });
 });
 
