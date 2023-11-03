@@ -421,7 +421,11 @@ class LinkedInController extends Controller
                     }
                 }
             }
-            $linkedin_profile_picture = $profile_picture[2][2]['identifiers'][0]['identifier'];
+            if (!empty($linkedin_profile_picture)) {
+                $linkedin_profile_picture = $profile_picture[2][2]['identifiers'][0]['identifier'];
+            } else {
+                $linkedin_profile_picture = null;
+            }
             $linkedin_user_id = $data['id'];
             foreach ($organisations as $key => $organisation){
                 if ($key === 3){
@@ -615,7 +619,12 @@ class LinkedInController extends Controller
     {
         try {
             $media = FoldersFiles::where('id', $file_id)->first();
-            $media_path = Storage::disk('media')->path($media->hash_name);
+            if (env('DISK_DRIVER') === 'mounted'){
+                $disk = 'volume';
+            } else {
+                $disk = 'media';
+            }
+            $media_path = Storage::disk($disk)->path($media->hash_name);
             $upload_request = [
                 'registerUploadRequest' => [
                     'owner' => $owner_urn,
