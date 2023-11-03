@@ -264,6 +264,7 @@ class UserController extends Controller
             }
 
             // Connected Accounts
+            $user_twitters = $user->twitter;
             $connected_accounts = array();
             $twitter = array();
             if (!empty($user_twitters)) {
