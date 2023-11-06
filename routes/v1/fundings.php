@@ -14,21 +14,34 @@ use App\Http\Controllers\Fundings\FundingController;
 Route::group(['middleware' => ['auth:api'], 'prefix' => 'fundings'], function () {
 
     /* BEGIN -- FUNDING BODIES */
-    Route::get('',[FundingController::class, 'index'])->name('fundings.index')->middleware(['role:funding-masterdata,1']);
+    Route::get('',[FundingController::class, 'index'])->name('fundings.index')->middleware(['role:funding,1']);
 
-    Route::post('',[FundingController::class, 'store'])->name('fundings.store')->middleware(['role:funding-masterdata,2']);
+    Route::post('',[FundingController::class, 'store'])->name('fundings.store')->middleware(['role:funding,2']);
 
-    Route::get('{id}',[FundingController::class, 'show'])->name('fundings.show')->middleware(['role:funding-masterdata,1']);
+    Route::get('retrieve',[FundingController::class, 'retrieve'])->name('fundings.retrieve')->middleware(['role:funding,1']);
 
-    Route::post('massDelete',[FundingController::class, 'massDelete'])->name('fundings.massDestroy')->middleware(['role:funding-masterdata,4']);
+    Route::get('{id}',[FundingController::class, 'show'])->name('fundings.show')->middleware(['role:funding,1']);
 
-    Route::post('{id}',[FundingController::class, 'update'])->name('fundings.update')->middleware(['role:funding-masterdata,3']);
+    Route::post('massDelete',[FundingController::class, 'massDelete'])->name('fundings.massDestroy')->middleware(['role:funding,4']);
 
-    Route::delete('{id}',[FundingController::class, 'destroy'])->name('fundings.destroy')->middleware(['role:funding-masterdata,4']);
+    Route::post('{id}',[FundingController::class, 'update'])->name('fundings.updateGeneral')->middleware(['role:funding,3']);
+
+    Route::post('masterData/{id}',[FundingController::class, 'updateMasterData'])->name('fundings.updateGeneral')->middleware(['role:funding,3']);
+
     /* END -- FUNDING BODIES */
 
-    /* BEGIN -- MASTER DATA */
+    /* BEGIN -- POSTS - TRASH */
+    Route::post('restore/{id}',[FundingController::class, 'restore'])->name('fundings.restore')->middleware(['role:funding,3']);
 
-    /* END -- MASTER DATA */
+    Route::post('massRestore',[FundingController::class, 'massRestore'])->name('fundings.massRestore')->middleware(['role:funding,3']);
+
+    Route::post('massDelete',[FundingController::class, 'massDelete'])->name('fundings.massDelete')->middleware(['role:funding,4']);
+
+    Route::post('forceDelete/{id}',[FundingController::class, 'forceDelete'])->name('fundings.forceDelete')->middleware(['role:funding,4']);
+
+    Route::post('massForceDelete',[FundingController::class, 'massForceDelete'])->name('fundings.massForceDelete')->middleware(['role:funding,4']);
+    /* END -- POSTS - TRASH */
+
+    Route::delete('{id}',[FundingController::class, 'destroy'])->name('fundings.destroy')->middleware(['role:funding,4']);
 
 });

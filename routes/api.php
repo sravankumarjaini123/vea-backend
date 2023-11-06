@@ -73,6 +73,8 @@ Route::group(['middleware' => 'log.entry'], function () {
 
         require __DIR__ . '/v1/fundingSubjects.php';
 
+        require __DIR__ . '/v1/fundings.php';
+
     });
 });
 
