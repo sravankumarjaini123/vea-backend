@@ -33,4 +33,15 @@ class SalutationController extends Controller
             ], 500);
         }
     } // End Function
+
+
+    // PMT Value
+/*$nper = 10;
+$pv = 6997;
+$rate = 0.06;
+$pmt = -( - $pv * pow(1 + $rate, $nper)) /
+((pow(1 + $rate, $nper) - 1) / $rate);
+dd($pmt);*/
+
+
 }

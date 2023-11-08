@@ -551,7 +551,7 @@ class FundingController extends Controller
             if (!empty($request->fundings_id)){
                 foreach ($request->fundings_id as $funding_id)
                 {
-                    $funding = Posts::where('id',$funding_id)->onlyTrashed()->first();
+                    $funding = Fundings::where('id',$funding_id)->onlyTrashed()->first();
                     if (!empty($funding)){
                         $funding->forceDelete();
                     }
