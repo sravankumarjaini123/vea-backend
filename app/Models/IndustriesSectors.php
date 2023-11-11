@@ -17,4 +17,12 @@ class IndustriesSectors extends Model
     {
         return $this->belongsToMany(Partners::class, 'partners_industries_sectors');
     }
+
+    /**
+     * Get the Processor of the Measure
+     */
+    public function industryGroup()
+    {
+        return $this->belongsTo(IndustriesSectorsGroups::class, 'industries_sectors_groups_id');
+    }
 }

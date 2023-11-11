@@ -75,6 +75,16 @@ Route::group(['middleware' => 'log.entry'], function () {
 
         require __DIR__ . '/v1/fundings.php';
 
+        require __DIR__ . '/v1/measures.php';
+
+        require __DIR__ . '/v1/measuresCategories.php';
+
+        require __DIR__ . '/v1/measuresProcessors.php';
+
+        require __DIR__ . '/v1/measuresTypes.php';
+
+        require __DIR__ . '/v1/measuresEnergySources.php';
+
     });
 });
 
