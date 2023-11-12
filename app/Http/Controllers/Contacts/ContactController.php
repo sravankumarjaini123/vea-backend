@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Contacts;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Partners\PartnersController;
+use App\Http\Controllers\Users\UserController;
 use App\Models\Labels;
 use App\Models\Partners;
 use App\Models\User;
@@ -13,8 +14,9 @@ use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
 use Laravel\Passport\RefreshToken;
 use Laravel\Passport\Token;
 use Nette\Schema\ValidationException;
@@ -162,7 +164,7 @@ class ContactController extends Controller
      * @param $usershow
      * @return array
      */
-    public function getContactDetails($customer_detail, $usershow=null): array
+    public function getContactDetails($customer_detail, $user_show=null): array
     {
         $result_array = array();
         if (!empty($customer_detail)) {
@@ -234,25 +236,22 @@ class ContactController extends Controller
             } else {
                 $company_address = null;
             }
+            $user_logins = array();
 
-            $user_logins = [];
-            if(!empty($customer_detail->userLogins)) {
-                foreach ($customer_detail->userLogins as $userLogin) {
-                    $user_logins[] = [
-                        'users_id' => $userLogin->users_id,
-                        'ip' => $userLogin->ip,
-                        'date' => $userLogin->date,
-                        'browser_agent' => $userLogin->browser_agent,
-                        'status' => $userLogin->status,
-                        'created_at' => $userLogin->created_at,
-                    ];
+            if(!empty($user_show)) {
+                if (!empty($customer_detail->userLogins)) {
+                    foreach ($customer_detail->userLogins as $userLogin) {
+                        $user_logins[] = [
+                            'users_id' => $userLogin->users_id,
+                            'ip' => $userLogin->ip,
+                            'date' => $userLogin->date,
+                            'browser_agent' => $userLogin->browser_agent,
+                            'status' => $userLogin->status,
+                        ];
+                    }
                 }
             }
-            if(!empty($usershow)) {
-                $user_logins = $user_logins;
-            } else {
-                $user_logins = null;
-            }
+
             $result_array = array_merge($result_array, ['personalInformation' => $personal_details,
                 'personalAddress' => $personal_address,
                 'companyAddress' => $company_address,
@@ -497,7 +496,7 @@ class ContactController extends Controller
     public function storeCompany(Request $request, $id):JsonResponse
     {
         try {
-            $user = User::where('id',$id)->first();
+            $user = User::where('id',$id)->where('sys_admin', 0)->where('sys_customer', 1)->first();
             if ($user) {
                 $request->validate([
                     'partner_code' => 'required|string',
@@ -505,9 +504,7 @@ class ContactController extends Controller
                 $company = Partners::where('code', $request->partner_code)->first();
                 if ($company) {
                     $user->partners_id = $company->id;
-
                     $user->save();
-
                     $company_detail = $user->company()->first();
                     $company_address = [
                         'code' => $company_detail->code,
@@ -538,6 +535,84 @@ class ContactController extends Controller
                     'status' => 'No Content',
                     'message' => 'There is no relevant information for selected query'
                 ],210);
+            }
+        } catch (ValidationException $exception)
+        {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception,
+            ], 500);
+        }
+    } // End Function
+
+    /**
+     * Method allow to update the new email/username.
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     * @throws ValidationException
+     */
+    public function changeEmail(Request $request, $id):JsonResponse
+    {
+        try {
+            $request->validate([
+                'email' => 'required|unique:users',
+            ]);
+            $user = User::where('id',$id)->first();
+
+            $user->email = $request->email;
+            $user->save();
+            // After changing if the User is same then User need to logout.
+            (new UserController())->revokeAndDeleteTokens($user);
+            if(!empty($user)) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Email updated successfully!',
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'There is no relevant information for selected query',
+                ], 210);
+            }
+        } catch (ValidationException $exception)
+        {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
+    /**
+     * Method allow to update the new password.
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     * @throws ValidationException
+     */
+    public function changePassword(Request $request, $id):JsonResponse
+    {
+        try {
+            $user = User::where('id',$id)->first();
+            if ($user) {
+                $request->validate([
+                    'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
+                ]);
+                $password = [
+                    'password' => Hash::make($request->password)
+                ];
+                User::where('id', $id)->update($password);
+                (new UserController())->revokeAndDeleteTokens($user);
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'The password has changed Successfully',
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'There is no relevant information for selected query',
+                ], 210);
             }
         } catch (ValidationException $exception)
         {
@@ -635,45 +710,21 @@ class ContactController extends Controller
 
     /**
      * Method allow to delete the Company Address of the user
-     * @param Request $request
      * @param $id
      * @return JsonResponse
      * @throws Exception
      */
-    public function deleteCompany(Request $request, $id):JsonResponse
+    public function deleteCompany($id):JsonResponse
     {
         try {
             $user = User::where('id',$id)->first();
             if ($user) {
-                if ($request->company_code == null) {
-                    $user->partners_id = null;
-                    $user->save();
-                    return response()->json([
-                        'status' => 'Success',
-                        'message' => 'Company for the user is removed successfully.',
-                    ], 200);
-                } else {
-                    $company = Partners::where('code',$request->company_code)->first();
-                    if ($company){
-                        if ($company->created_by == $user->id) {
-                            $company_delete = Partners::where('code', $request->company_code)->delete();
-                            return response()->json([
-                                'status' => 'Success',
-                                'message' => 'Company and users to the company are detached successfully',
-                            ], 200);
-                        } else {
-                            return response()->json([
-                                'status' => 'Error',
-                                'message' => 'Cannot delete the company please contact administrator',
-                            ], 401);
-                        }
-                    } else {
-                        return response()->json([
-                            'status' => 'Error',
-                            'message' => 'Please enter the valid company code',
-                        ], 210);
-                    }
-                }
+                $user->partners_id = null;
+                $user->save();
+                return response()->json([
+                    'status' => 'Success',
+                    'message' => 'Company for the user is removed successfully.',
+                ], 200);
             } else {
                 return response()->json([
                     'status' => 'No Content',

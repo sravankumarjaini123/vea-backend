@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Contacts;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\UserAuth\UserController;
 use App\Models\User;
-use App\Models\UsersDevices;
 use App\Models\UsersLogin;
-use App\Models\WebsitesAppsSettingsGeneral;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Http\JsonResponse;
@@ -94,36 +92,12 @@ class LoginController extends Controller
                     'browser_agent' => (!empty($login_parameters['browser_agent'])) ? $login_parameters['browser_agent'] : null,
                     'status' => 1,
                 ];
-                $store_login_details = UsersLogin::create($login_details);
+                $store_login_details = UsersLogin::insert($login_details);
             }
 
             if ($user && $user->is_blocked != 1){
-                if ($client_id == 4){
-                    $device_request = new Request();
-                    $device_request->setMethod('POST');
-                    $device_request->user_id = $user->id;
-                    $device_request->device_id = $login_parameters['device_id'];
-                    $device_request->device_name = $login_parameters['device_name'];
-                    $device_request->device_model = $login_parameters['device_model'];
-                    $device_request->device_location = $login_parameters['device_location'] ?? null;
-                    $status = $this->userDeviceStatus($device_request);
-                    if ($status->getStatusCode() === 210 || $status->getStatusCode() === 422) {
-                        return response()->json([
-                            'status' => $status->getData()->status,
-                            'message' => $status->getData()->message,
-                        ],210);
-                    }
-                } else {
-                    $this->OldTokenExpiration($user, $client_id);
-                }
-
+                $this->OldTokenExpiration($user, $client_id);
                 $tokenDetails = $this->issueToken($request);
-                if ($client_id == 4) {
-                    $tokens = Auth::user()->tokens()->where('revoked', 0)->get();
-                    foreach ($tokens as $token) {
-                        RefreshToken::where('access_token_id', $token->id)->update(['expires_at' => Carbon::now()->addDays(7)]);
-                    }
-                }
                 $token_contents = json_decode((string)$tokenDetails->content(), true);
 
                 if ($user->two_factor_secret == null) {
@@ -135,11 +109,9 @@ class LoginController extends Controller
                         'tokenDetails' => $token_contents,
                         'userDetails' => $userDetails,
                         'status' => 'Success',
-                        'message' => 'Welcome to Omnics Manager, Explore our new features.',
+                        'message' => 'Welcome to VEA Software, Explore our new features.',
                     ], 200);
                 } else {
-
-                    // Get the user details as response
                     $user_details = [
                         'id' => $user->id,
                         'has2FA' => true,
@@ -155,11 +127,11 @@ class LoginController extends Controller
                     'message' => 'Error in logging into the system, Please try after some time',
                 ],400);
             }
-        } catch (\Nette\Schema\ValidationException $exception)
+        } catch (ValidationException $exception)
         {
             return response()->json([
                 'status' => 'Error',
-                'message' => $exception,
+                'message' => $exception->getMessage(),
             ],500);
         }
     } // End Function
@@ -328,7 +300,7 @@ class LoginController extends Controller
                 'tokenDetails' => $token_contents,
                 'userDetails' => $result,
                 'status' => 'Success',
-                'message' => 'Welcome to Omnics Manager, Explore our new features.',
+                'message' => 'Welcome to VEA Software, Explore our new features.',
             ], 200);
         } catch (Exception $exception)
         {

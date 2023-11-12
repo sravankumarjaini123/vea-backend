@@ -20,9 +20,9 @@ Route::group(['middleware' =>  config('fortify.middleware', ['web']),'prefix' =>
 
     Route::post('register',[AuthenticateController::class, 'register'])->name('contact.register');
 
-    Route::post('register/app',[AuthenticateController::class, 'register'])->name('contact.register');
+//    Route::post('register/app',[AuthenticateController::class, 'register'])->name('contact.register');
 
-//    Route::post('login',[LoginController::class, 'login'])->name('contact.login');
+    Route::post('login',[LoginController::class, 'login'])->name('contact.login');
 
 });
 
@@ -42,9 +42,7 @@ Route::group(['prefix' => 'contact'],function(){
     /* BEGIN -- COMPANY ADDRESS */
     Route::group(['prefix' =>'companyAddress'],function () {
 
-        Route::post('create/{id}', [ContactController::class, 'storeCompany'])->name('contact.company.store')->middleware(['role:contacts,3']);
-
-//         Route::post('update/{id}', [ContactController::class, 'updateCompany'])->name('contact.company.update')->middleware(['role:contacts,3']);
+        Route::post('update/{id}', [ContactController::class, 'storeCompany'])->name('contact.company.store')->middleware(['role:contacts,3']);
 
         Route::post('delete/{id}', [ContactController::class, 'deleteCompany'])->name('contact.company.delete')->middleware(['role:contacts,3']);
 
@@ -59,7 +57,6 @@ Route::group(['prefix' => 'contact'],function(){
 
 });
 
-
 /* AUTHENTICATION */
 Route::group(['middleware' => ['auth:api']], function () {
 
@@ -67,15 +64,13 @@ Route::group(['middleware' => ['auth:api']], function () {
 
         Route::get('getLoginsList/{id}', [UserController::class, 'contactsLoginsList'])->name('contact.loginlist')->middleware(['role:contacts,3']);
 
-        Route::post('changeEmail/{id}', [UserController::class, 'changeEmail'])->name('contact.change-email')->middleware(['role:contacts,3']);
+        Route::post('changeEmail/{id}', [ContactController::class, 'changeEmail'])->name('contact.changeEmail')->middleware(['role:contacts,3']);
 
-        Route::post('updateEmail/{id}', [UserController::class, 'updateEmail'])->name('contact.update-email')->middleware(['role:contacts,3']);
-
-        Route::post('updatePassword/{id}', [UserController::class, 'updatePassword'])->name('contact.update-password')->middleware(['role:contacts,3']);
+        Route::post('changePassword/{id}', [ContactController::class, 'changePassword'])->name('contact.changePassword')->middleware(['role:contacts,3']);
 
         Route::post('labels/{id}', [UserController::class, 'updateLabels'])->name('contact.update.labels')->middleware(['role:contacts,3']);
 
-        Route::post('state/{id}', [ContactController::class, 'updateState'])->name('contact.update.block')->middleware(['role:contacts,1']);
+        Route::post('state/{id}', [ContactController::class, 'updateState'])->name('contact.update.block')->middleware(['role:contacts,3']);
 
         Route::post('verification/email/{id}', [ContactController::class, 'emailWithCodeConfirmation'])->name('contact.update.block')->middleware(['role:contacts,1']);
 

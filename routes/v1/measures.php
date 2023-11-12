@@ -31,6 +31,8 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'measures'], function ()
 
     Route::post('general/{id}',[MeasureController::class, 'updateGeneral'])->name('measures.updateGeneral')->middleware(['role:measure,3']);
 
+    Route::post('status/{id}',[MeasureController::class, 'updateStatus'])->name('measures.updateStatus')->middleware(['role:measure,3']);
+
     Route::post('masterData/{id}',[MeasureController::class, 'updateMasterData'])->name('measures.updateMasterData')->middleware(['role:measure,3']);
 
     Route::post('investment/{id}',[MeasureController::class, 'updateInvestment'])->name('measures.updateInvestment')->middleware(['role:measure,3']);

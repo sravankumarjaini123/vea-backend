@@ -41,6 +41,7 @@ return new class extends Migration
 
             $table->json('source')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->charset = 'utf8mb4';
             $table->collation = 'utf8mb4_general_ci';

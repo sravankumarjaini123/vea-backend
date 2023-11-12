@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Nette\Schema\ValidationException;
 
 class TokensController extends Controller
@@ -21,13 +23,28 @@ class TokensController extends Controller
     {
         try {
             $request->validate([
-                'channel' => 'required|in:backend',
+                'channel' => 'required|in:backend,web',
             ]);
             // Check if Existing or not
             $client_details = DB::table('oauth_clients')->get();
             // If Not then create the default Client Tokens
             if (count($client_details) === 0){
                 Artisan::call('passport:install');
+            }
+
+            if (! DB::table('oauth_clients')->where('name','=','Web Password Grant Client')->exists()) {
+                $secret = Str::random(48);
+                DB::table('oauth_clients')->insert([
+                    'name' => 'Web Password Grant Client',
+                    'secret' => $secret,
+                    'provider' => 'users',
+                    'redirect' => 'http://localhost',
+                    'personal_access_client' => 0,
+                    'password_client' => 1,
+                    'revoked' => 0,
+                    'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                    'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                ]);
             }
 
             if ($request->channel === 'backend'){

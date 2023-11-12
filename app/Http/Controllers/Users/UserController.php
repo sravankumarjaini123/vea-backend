@@ -158,43 +158,6 @@ class UserController extends Controller
 
     /**
      * Method allow to update the new email/username.
-     * @param Request $request
-     * @param $id
-     * @return JsonResponse
-     * @throws ValidationException
-     */
-    public function changeEmail(Request $request, $id):JsonResponse
-    {
-        try {
-            $request->validate([
-                'email' => 'required|unique:users',
-            ]);
-            $user = User::where('id',$id)->first();
-
-            $user->email = $request->email;
-            $user->save();
-            if(!empty($user)) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Email updated successfully!',
-                ], 200);
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'There is no relevant information for selected query',
-                ], 210);
-            }
-        } catch (ValidationException $exception)
-        {
-            return response()->json([
-                'status' => 'Error',
-                'message' => $exception->getMessage(),
-            ], 500);
-        }
-    } // End Function
-
-    /**
-     * Method allow to update the new email/username.
      * @param $id
      * @return JsonResponse
      * @throws ValidationException
@@ -340,7 +303,6 @@ class UserController extends Controller
             if ($user) {
                 if ($user->email !== $request->email) {
                     if (Hash::check($confirm_password, $user->password)) {
-
                         // Save the changes to the database
                         $email = [
                             'email' => $request->email

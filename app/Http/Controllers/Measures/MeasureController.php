@@ -13,6 +13,29 @@ use Exception;
 
 class MeasureController extends Controller
 {
+    /**
+     * Method allow to display list of all Measures
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function index(Request $request):JsonResponse
+    {
+        try {
+            $measures = Measures::all();
+            $data = $this->getMeasureDetails($measures);
+            return response()->json([
+                'measure' => $data,
+                'message' => 'Success',
+            ], 200);
+        } catch (Exception $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getLine(),
+            ], 500);
+        }
+    } // End Function
+
     public function getMeasureDetails($measures):array
     {
         $result_array = array();
@@ -190,6 +213,46 @@ class MeasureController extends Controller
             ], 500);
         }
     } // End Function
+
+    /**
+     * Method allow to update the Status the Measure.
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function updateStatus(Request $request, $id):JsonResponse
+    {
+        try {
+            if (Measures::where('id', $id)->exists()) {
+                $request->validate([
+                    'status' => 'required|in:open,inProgress,complete'
+                ]);
+                $measure = Measures::where('id', $id)->first();
+                $measure->status = $request->status;
+                $measure->save();
+                $result_array = [
+                    'id' => $measure->id,
+                    'status' => $measure->status,
+                ];
+                return response()->json([
+                    'measure' => $result_array,
+                    'message' => 'Success',
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 'No Content',
+                    'message' => 'There is no relevant information for selected query'
+                ], 210);
+            }
+        } catch (Exception $exception)
+        {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    }
 
     /**
      * Method allow to update the different Master Data of the Measure at once.
@@ -373,6 +436,232 @@ class MeasureController extends Controller
                 ], 210);
             }
         } catch (Exception $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
+    /**
+     * Method allow to delete the particular Measure.
+     * @param $id
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function destroy($id):JsonResponse
+    {
+        try {
+            if (Measures::where('id',$id)->exists()){
+                Measures::where('id',$id)->delete();
+
+                return response()->json([
+                    'status' => 'Success',
+                    'message' => 'The Measure is deleted successfully',
+                ],200);
+            }else{
+                return response()->json([
+                    'status' => 'No Content',
+                    'message' => 'There is no relevant information for selected query'
+                ],210);
+            }
+        } catch (Exception $exception)
+        {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
+    /**
+     * Method allow to soft delete the set of Measures.
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function massDelete(Request $request):JsonResponse
+    {
+        try {
+            if (!empty($request->measures_id)){
+                foreach ($request->measures_id as $measure_id)
+                {
+                    $funding = Measures::findOrFail($measure_id);
+                    $funding->delete();
+                }
+                return response()->json([
+                    'status' => 'Success',
+                    'message' => 'The Measures are deleted successfully',
+                ],200);
+            } else {
+                return response()->json([
+                    'status' => 'Error',
+                    'message' => 'Please select at least one Measure to delete'
+                ], 422);
+            }
+        } catch (Exception $exception)
+        {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
+    /**
+     * Method allow to Retrieve list of deleted Measures.
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function retrieve():JsonResponse
+    {
+        try {
+            $measures = Measures::onlyTrashed()->get();
+            $measure_details = $this->getMeasureDetails($measures);
+            return response()->json([
+                'measures' => $measure_details,
+                'message' => 'Success',
+            ], 200);
+
+        } catch (Exception $exception)
+        {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+                'line' => $exception->getLine(),
+            ], 500);
+        }
+    } // End Function
+
+    /**
+     * Method allow to Restore the particular Measure.
+     * @param $id
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function restore($id):JsonResponse
+    {
+        try {
+            if (Measures::where('id',$id)->onlyTrashed()->exists()){
+                $measures = Measures::where('id',$id)->onlyTrashed()->restore();
+                return response()->json([
+                    'status' => 'Success',
+                    'message' => 'Funding is restored successfully'
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 'No Content',
+                    'message' => 'There is no relevant information for selected query'
+                ], 210);
+            }
+        } catch (Exception $exception)
+        {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
+    /**
+     * Method allow to Restore group of Measures.
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function massRestore(Request $request):JsonResponse
+    {
+        try {
+            if (!empty($request->measures_id)){
+                foreach ($request->measures_id as $measure_id)
+                {
+                    $measure = Measures::where('id',$measure_id)->onlyTrashed()->first();
+                    if (!empty($measure)){
+                        $measure->restore();
+                    }
+                }
+                return response()->json([
+                    'status' => 'Success',
+                    'message' => 'Measures are restored successfully'
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 'Error',
+                    'message' => 'Please select at least one Measure to delete'
+                ], 422);
+            }
+
+        } catch (Exception $exception)
+        {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
+    /**
+     * Method allow to Delete the Measures permanently
+     * @param $id
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function forceDelete($id):JsonResponse
+    {
+        try {
+            if (Measures::where('id',$id)->onlyTrashed()->exists()){
+                Measures::where('id',$id)->forceDelete();
+
+                return response()->json([
+                    'status' => 'Success',
+                    'message' => 'The Measure is successfully deleted permanently!',
+                ],200);
+
+            }else{
+                return response()->json([
+                    'status' => 'No Content',
+                    'message' => 'There is no relevant information for selected query'
+                ],210);
+            }
+        } catch (Exception $exception)
+        {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
+    /**
+     * Method allow to Delete multiple Measures permanently
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function massForceDelete(Request $request):JsonResponse
+    {
+        try {
+            if (!empty($request->measures_id)){
+                foreach ($request->measures_id as $measure_id)
+                {
+                    $measure = Measures::where('id',$measure_id)->onlyTrashed()->first();
+                    if (!empty($measure)){
+                        $measure->forceDelete();
+                    }
+                }
+                return response()->json([
+                    'status' => 'Success',
+                    'message' => 'Measures are permanently deleted successfully'
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 'Error',
+                    'message' => 'Please select at least one Measure to delete'
+                ], 422);
+            }
+
+        } catch (Exception $exception)
+        {
             return response()->json([
                 'status' => 'Error',
                 'message' => $exception->getMessage(),

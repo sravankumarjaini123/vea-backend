@@ -18,7 +18,7 @@ class RoleMiddleware
     {
         $user = Auth::guard('api')->user();
         $users_roles = Auth::guard('api')->user()->getUserRole();
-        if ($resource === 'users' && $permission_id == 3 && $request->id == $user->id) {
+        if ($resource === 'contacts' && $permission_id == 3 && $request->id == $user->id) {
             return $next($request);
         }
         if (!$users_roles->isEmpty() && $user->sys_admin == true) {

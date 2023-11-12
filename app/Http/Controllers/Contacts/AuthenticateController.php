@@ -40,17 +40,20 @@ class AuthenticateController extends Controller
                 'first_name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
-                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
                 'condition' => 'nullable|in:app_user_signup',
             ]);
 
-            $password = $request->password;
+            if ($request->password != null) {
+                $password = $request->password;
+            } else {
+                $password = 'Welcome1234@$';
+            }
             $username = $this->generateRandomUserName();
-            $verification = null;
 
             $customer_id = User::insertGetId([
                 'salutations_id' => $request->salutation_id,
-                'titles_id' => $request->title_id,
+                'titles_id' => $request->title_id ?? null ,
                 'firstname' => $request->first_name,
                 'lastname' => $request->last_name,
                 'email' => $request->email,
@@ -58,36 +61,18 @@ class AuthenticateController extends Controller
                 'sys_admin' => false,
                 'sys_customer' => true,
                 'username' => $username,
-                'verification_status' => $verification,
+                'verification_status' => null,
                 'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ]);
             if ($customer_id != null) {
                 $customer = User::where('id', $customer_id)->first();
-                if ($customer->titles_id != null) {
-                    $title = $customer->title->title;
-                } else {
-                    $title = null;
-                }
-                $customer_details = [
-                    'id' => $customer->id,
-                    'salutations_id' => $customer->salutations_id,
-                    'salutation' => $customer->salutation->salutation,
-                    'titles_id' => $customer->titles_id,
-                    'title' => $title,
-                    'firstname' => $customer->firstname,
-                    'lastname' => $customer->lastname,
-                    'username' => $customer->username,
-                    'email' => $customer->email,
-                    'is_blocked' => $customer->is_blocked,
-                    'labels' => [],
-                    'profile_photo_url' => $customer->profile_photo_url,
-                    'created_at' => $customer->created_at,
-                ];
+                $customer_array = (new ContactController())->getContactDetails($customer);
+
                 return response()->json([
-                    'personalInformation' => $customer_details,
-                    'personalAddress' => null,
-                    'companyAddress' => null,
-                    'status' => 'Success',
+                    'personalInformation' => $customer_array['personalInformation'],
+                    'personalAddress' => $customer_array['personalAddress'],
+                    'companyAddress' => $customer_array['companyAddress'],
+                    'userLogins' => $customer_array['userLogins'],
                     'message' => 'Registration is successful, Please check your mail for activating your account',
                 ], 200);
             } else {
@@ -100,7 +85,7 @@ class AuthenticateController extends Controller
         {
             return response()->json([
                 'status' => 'Error',
-                'message' => $exception,
+                'message' => $exception->getLine(),
             ], 500);
         }
     } // End Function
