@@ -7,6 +7,7 @@ use App\Models\Measures;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Nette\Schema\ValidationException;
 use Exception;
@@ -69,6 +70,9 @@ class MeasureController extends Controller
                         'company_name' =>  $contact_person_partner_name ?? null,
                     ];
                 }
+                // Energy Sources
+                $energy_sources = $this->getEnergySourcesDetails($measure->energySources);
+
                 $result_array[] = [
                     'id' => $measure->id,
                     'status' => $measure->status,
@@ -94,6 +98,7 @@ class MeasureController extends Controller
                     'industry_sector_group_name' => $industries_sectors_group_name ?? null,
                     'company_size' => $measure->company_size,
                     'contact_person_details' => $contact_person_details ?? (object)array(),
+                    'energy_sources' => $energy_sources,
                     'sources' => json_decode($measure->source) ?? null,
                 ];
             }
@@ -442,6 +447,94 @@ class MeasureController extends Controller
             ], 500);
         }
     } // End Function
+
+    /**
+     * Method allow to attach the Energy Source for the Measure with respective Saving.
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function attachEnergySources(Request $request, $id):JsonResponse
+    {
+        try {
+            if (Measures::where('id',$id)->exists()){
+                $request->validate([
+                    'energy_source_id' => 'required',
+                    'energy_source_saving' => 'required'
+                ]);
+                $measure = Measures::where('id', $id)->first();
+                if (!$measure->energySources()->where('measures_energy_sources_id', $request->energy_source_id)->exists()) {
+                    $measure->energySources()->attach($request->energy_source_id,
+                        ['measures_energy_savings' => $request->energy_source_saving]);
+                }
+                $energy_sources = $this->getEnergySourcesDetails($measure->energySources);
+                return response()->json([
+                    'measure' => $energy_sources,
+                    'message' => 'Success',
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 'No Content',
+                    'message' => 'There is no relevant information for selected query'
+                ], 210);
+            }
+        } catch (ValidationException $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
+    /**
+     * Method allow to Detach the Energy Source for the Measure.
+     * @param $id
+     * @param $data_id
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function detachEnergySources($id, $data_id):JsonResponse
+    {
+        try {
+            if (Measures::where('id',$id)->exists()){
+                DB::table('measures_measures_energy_sources')->where('id', $data_id)->delete();
+                $measure = Measures::where('id', $id)->first();
+                $energy_sources = $this->getEnergySourcesDetails($measure->energySources);
+                return response()->json([
+                    'measure' => $energy_sources,
+                    'message' => 'Success',
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 'No Content',
+                    'message' => 'There is no relevant information for selected query'
+                ], 210);
+            }
+        } catch (Exception $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
+    public function getEnergySourcesDetails($sources):array
+    {
+        $result_array = array();
+        if (!empty($sources)) {
+            foreach ($sources as $source) {
+                $result_array[] =[
+                    'data_id' => $source->pivot->id,
+                    'energy_saving_id' => $source->id,
+                    'energy_saving_name' => $source->name,
+                    'energy_source_saving' => $source->pivot->measures_energy_savings,
+                ];
+            }
+        }
+        return $result_array;
+    } // End Function
+
 
     /**
      * Method allow to delete the particular Measure.

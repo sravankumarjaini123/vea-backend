@@ -51,5 +51,14 @@ class Measures extends Model
     {
         return $this->belongsTo(User::class, 'contacts_persons_id');
     }
+
+    /**
+     * Get the Energyy Sources the Measure
+     */
+    public function energySources()
+    {
+        return $this->belongsToMany(MeasuresEnergySources::class, 'measures_measures_energy_sources', 'measures_id', 'measures_energy_sources_id')
+            ->withPivot('id', 'measures_energy_savings');
+    }
 }
 

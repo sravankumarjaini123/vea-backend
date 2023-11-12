@@ -38,14 +38,16 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'measures'], function ()
     Route::post('investment/{id}',[MeasureController::class, 'updateInvestment'])->name('measures.updateInvestment')->middleware(['role:measure,3']);
 
     Route::post('additional/{id}',[MeasureController::class, 'updateAdditional'])->name('measures.updateInvestment')->middleware(['role:measure,3']);
-    /* END -- MEASURE BODIES */
 
-    /* BEGIN -- MEASURE - TRASH */
+    Route::post('energySources/attach/{id}',[MeasureController::class, 'attachEnergySources'])->name('measures.energySources')->middleware(['role:measure,3']);
+
+    Route::post('energySources/detach/{id}/{data_id}',[MeasureController::class, 'detachEnergySources'])->name('measures.energy.sources')->middleware(['role:measure,3']);
+
     Route::post('restore/{id}',[MeasureController::class, 'restore'])->name('measures.restore')->middleware(['role:measure,3']);
 
     Route::post('forceDelete/{id}',[MeasureController::class, 'forceDelete'])->name('measures.forceDelete')->middleware(['role:measure,4']);
-    /* END -- MEASURE - TRASH */
 
     Route::delete('{id}',[MeasureController::class, 'destroy'])->name('measures.destroy')->middleware(['role:measure,4']);
 
+    /* END -- MEASURE BODIES */
 });
