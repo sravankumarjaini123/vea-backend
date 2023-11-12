@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Resources;
 
 return new class extends Migration
 {
@@ -57,6 +58,13 @@ return new class extends Migration
             $table->foreign('contacts_persons_id')->references('id')->on('users')
                 ->onDelete('set null')->onUpdate('cascade');
         });
+
+        if (!Resources::where('slug', 'Measure')->exists()) {
+            Resources::insert([
+                'name' => 'Measure',
+                'slug' => 'measure',
+            ]);
+        }
     }
 
     /**

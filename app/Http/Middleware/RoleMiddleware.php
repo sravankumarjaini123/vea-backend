@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,6 +21,23 @@ class RoleMiddleware
         $users_roles = Auth::guard('api')->user()->getUserRole();
         if ($resource === 'contacts' && $permission_id == 3 && $request->id == $user->id) {
             return $next($request);
+        }
+        if ($user->sys_admin == false && $user->sys_customer == true) {
+            $final_user = User::where('id', $user->id)->first();
+            if ($final_user->company != null) {
+                $user_resources = $final_user->company->resources->makeHidden('pivot');
+                if (!empty($user_resources)) {
+                    foreach ($user_resources as $user_resource) {
+                        if ($user_resource->slug === $resource && $permission_id == 1) {
+                            return $next($request);
+                        }
+                    }
+                }
+            }
+            return response()->json([
+                'status' => 'Error',
+                'message' => 'Sorry, There is no permission to perform this action.'
+            ], 450);
         }
         if (!$users_roles->isEmpty() && $user->sys_admin == true) {
             foreach ($users_roles as $users_role) {

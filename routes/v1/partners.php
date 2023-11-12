@@ -36,6 +36,8 @@ Route::group(['middleware' => ['auth:api']], function () {
 
         Route::post('notes/{id}', [PartnersController::class, 'updateNotes'])->name('partners.notes')->middleware(['role:partners,3']);
 
+        Route::post('resources/{id}', [PartnersController::class, 'updateResources'])->name('partners.resources')->middleware(['role:partners,3']);
+
         /* BEGIN - MASTER DATA */
 
         Route::post('labels/{id}', [PartnersController::class, 'updateLabels'])->name('partners.updateLabels')->middleware(['role:partners,3']);

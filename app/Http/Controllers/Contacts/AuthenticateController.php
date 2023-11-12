@@ -173,5 +173,35 @@ class AuthenticateController extends Controller
             ], 500);
         }
     } // End Function
+
+    /**
+     * Method allowed to retrieve the resources allowed for the contact of Partner
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function getResources():JsonResponse
+    {
+        try {
+            $user = Auth::guard('api')->user();
+            if ($user) {
+                $final_user = User::where('id', $user->id)->first();
+                $resources = $final_user->company->resources->makeHidden('pivot');
+                return response()->json([
+                    'resources' => $resources,
+                    'message' => 'Success',
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 'Error',
+                    'message' => 'Please login to get the resources and access the VEA Software',
+                ],422);
+            }
+        } catch (Exception $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
 }
 

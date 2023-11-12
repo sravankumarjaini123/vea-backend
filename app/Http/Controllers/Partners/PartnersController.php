@@ -275,6 +275,57 @@ class PartnersController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
+    public function updateResources(Request $request, $id):JsonResponse
+    {
+        try {
+            if (Partners::where('id',$id)->exists()){
+                $partner = Partners::where('id',$id)->first();
+                $partner_resources = $partner->resources;
+                // Delete related records
+                if (!empty($partner_resources)){
+                    foreach ($partner_resources as $partner_resource){
+                        $partner->resources()->detach($partner_resource->id);
+                    }
+                }
+                // Save new related data
+                if (!empty($request->resources_id)){
+                    foreach ($request->resources_id as $resource_id){
+                        $partner->resources()->attach($resource_id, ['created_at'=>Carbon::now()->format('Y-m-d H:i:s')]);
+                    }
+                }
+                // Build Response array
+                $updated_partner = Partners::where('id',$id)->first();
+                $partner_label_details = $updated_partner->resources;
+                $partner_resources_details = $this->getPartnersResourcesDetails($partner_label_details);
+
+                return response()->json([
+                    'partner_resources' => $partner_resources_details,
+                    'status' => 'Success',
+                    'message' => 'Labels are updated successfully'
+                ], 200);
+
+            } else{
+                return response()->json([
+                    'status' => 'No Content',
+                    'message' => 'There is no relevant information for selected query'
+                ],210);
+
+            }
+        } catch (Exception $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
+    /**
+     * Method allow to assign the Labels for Partners.
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     * @throws Exception
+     */
     public function updateLabels(Request $request, $id):JsonResponse
     {
         try {
@@ -471,6 +522,11 @@ class PartnersController extends Controller
                     $partner_logo_square_url = null;
                 }
 
+                // Resources
+                $partner_label_details = $partner->resources;
+                $partner_resources_details = $this->getPartnersResourcesDetails($partner_label_details);
+
+
                 // Response Array
                 $partners_details[] = [
                     'id' => $partner->id,
@@ -495,6 +551,7 @@ class PartnersController extends Controller
                     'logo_square_url' => $partner_logo_square_url,
                     'labels' => $partners_labels,
                     'industries_sectors' => $partners_sectors,
+                    'resources' => $partner_resources_details,
                     'created_by' => $partner->created_by,
                     'created_at' => $partner->created_at,
                 ];
@@ -504,7 +561,7 @@ class PartnersController extends Controller
     } // End function
 
     /**
-     * Method allow to get details of Labels and industry sectors by passing parameters.
+     * Method allow to get details of Master Data by passing parameters.
      * @param $details
      * @return array
      */
@@ -516,6 +573,26 @@ class PartnersController extends Controller
                 $partner_details[] = [
                     'id' => $detail->id,
                     'name' => $detail->name,
+                ];
+            }
+        }
+        return $partner_details;
+    } // End Function
+
+    /**
+     * Method allow to get details of Master Data by passing parameters.
+     * @param $details
+     * @return array
+     */
+    public function getPartnersResourcesDetails($details):array
+    {
+        $partner_details = array();
+        if (!empty($details)){
+            foreach ($details as $detail){
+                $partner_details[] = [
+                    'id' => $detail->id,
+                    'name' => $detail->name,
+                    'slug' => $detail->slug
                 ];
             }
         }

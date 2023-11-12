@@ -73,4 +73,13 @@ class Partners extends Model
         return $this->belongsTo(FoldersFiles::class,'logo_square_file_id');
     }
 
+    /**
+     * Method allow to get collection of labels of particular partner.
+     * @return BelongsToMany
+     */
+    public function resources(): BelongsToMany
+    {
+        return $this->belongsToMany(Resources::class, 'partners_resources');
+    }
+
 } // End class

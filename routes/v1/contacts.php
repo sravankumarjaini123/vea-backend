@@ -24,6 +24,8 @@ Route::group(['middleware' =>  config('fortify.middleware', ['web']),'prefix' =>
 
     Route::post('login',[LoginController::class, 'login'])->name('contact.login');
 
+    Route::get('resources',[AuthenticateController::class, 'getResources'])->name('contact.resources');
+
 });
 
 Route::group(['prefix' => 'contact'],function(){
@@ -42,13 +44,13 @@ Route::group(['prefix' => 'contact'],function(){
     /* BEGIN -- COMPANY ADDRESS */
     Route::group(['prefix' =>'companyAddress'],function () {
 
-        Route::post('update/{id}', [ContactController::class, 'storeCompany'])->name('contact.company.store')->middleware(['role:contacts,3']);
+        Route::post('update/{id}', [ContactController::class, 'storeCompany'])->name('contact.companyStore')->middleware(['role:contacts,3']);
 
         Route::post('delete/{id}', [ContactController::class, 'deleteCompany'])->name('contact.company.delete')->middleware(['role:contacts,3']);
 
         Route::post('add/{id}', [ContactController::class, 'addAndAttachCompanyToContact'])->name('contact.company.add')->middleware(['role:contacts,3']);
 
-        Route::post('update/{id}', [ContactController::class, 'updateAttachedCompany'])->name('contact.company.update')->middleware(['role:contacts,3']);
+        // Route::post('update/{id}', [ContactController::class, 'updateAttachedCompany'])->name('contact.company.update')->middleware(['role:contacts,3']);
 
         Route::post('remove/{id}', [ContactController::class, 'removeAttachedCompany'])->name('contact.company.delete')->middleware(['role:contacts,3']);
 
