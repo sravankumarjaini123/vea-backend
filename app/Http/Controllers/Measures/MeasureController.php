@@ -627,6 +627,50 @@ class MeasureController extends Controller
     } // End Function
 
     /**
+     * Method allow to retrieve all the parameters for Measures Calculation
+     * @param $id
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function indexParameters():JsonResponse
+    {
+        try {
+            $parameters = DB::table('measures_parameters')->get();
+            $internals = array();
+            $price_indices = array();
+            foreach ($parameters as $parameter) {
+                if ($parameter->type === 'internal') {
+                    $internals[] = [
+                        'id' => $parameter->id,
+                        'key' => $parameter->key,
+                        'value' => $parameter->value,
+                    ];
+                }
+                if ($parameter->type === 'price_index') {
+                    $price_indices[] = [
+                        'id' => $parameter->id,
+                        'key' => $parameter->key,
+                        'key_extra' => $parameter->key_extra,
+                        'value' => $parameter->value,
+                    ];
+                }
+            }
+            return response()->json([
+                'measuresInternalParameters' => $internals,
+                'measuresPriceIndicesParameters' => $price_indices,
+                'message' => 'Success',
+            ], 200);
+        } catch (Exception $exception)
+        {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+                'line' => $exception->getLine(),
+            ], 500);
+        }
+    } // End Function
+
+    /**
      * Method allow to Restore the particular Measure.
      * @param $id
      * @return JsonResponse
@@ -761,4 +805,23 @@ class MeasureController extends Controller
             ], 500);
         }
     } // End Function
+
+    /**
+     * Method allow to calculate all the measured values depending on the various parameters
+     * @param $id
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function measuresCalculate($id):JsonResponse
+    {
+        try {
+            dd('Hi');
+        } catch (Exception $exception)
+        {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // Emd Function
 }

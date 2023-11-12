@@ -21,6 +21,10 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'measures'], function ()
 
     Route::get('retrieve',[MeasureController::class, 'retrieve'])->name('measures.retrieve')->middleware(['role:measure,1']);
 
+    Route::get('parameters',[MeasureController::class, 'indexParameters'])->name('measures.parameters')->middleware(['role:measure-masterdata,3']);
+
+    Route::get('calculate/{id}',[MeasureController::class, 'measuresCalculate'])->name('measures.calculate')->middleware(['role:measure-masterdata,1']);
+
     Route::get('{id}',[MeasureController::class, 'show'])->name('measures.show')->middleware(['role:measure,1']);
 
     Route::post('massDelete',[MeasureController::class, 'massDelete'])->name('measures.massDestroy')->middleware(['role:measure,4']);
