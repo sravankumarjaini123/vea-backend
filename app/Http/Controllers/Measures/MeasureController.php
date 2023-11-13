@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Measures;
 
 use App\Http\Controllers\Controller;
 use App\Models\Measures;
+use App\Models\MeasuresParameters;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Nette\Schema\ValidationException;
 use Exception;
+use MathPHP\Finance;
 
 class MeasureController extends Controller
 {
@@ -815,7 +817,106 @@ class MeasureController extends Controller
     public function measuresCalculate($id):JsonResponse
     {
         try {
-            dd('Hi');
+            $measure = Measures::where('id', $id)->first();
+            $interest_rate = MeasuresParameters::where('id', 1)->first()->value / 100;
+            $yearly_increase_rate = MeasuresParameters::where('id', 2)->first()->value / 100;
+            $yearly_values = DB::table('measures_parameters')->where('type', '=', 'price_index')
+                ->orderBy('key', 'DESC')->get();
+            $final_savings = 0;
+            $energy_sources = $measure->energySources;
+            foreach ($energy_sources as $energy_source) {
+                $final_savings += $energy_source->energy_price * $energy_source->pivot->measures_energy_savings;
+            }
+            $final_savings = (int)$final_savings;
+
+            $counter = 0;
+            $cash_flows = array();
+            foreach ($yearly_values as $yearly_value) {
+                if ($counter <= 10) {
+                    if ($counter == 0) {
+                        if ($measure->investment_year == null) {
+                            $price_index = 1;
+                        } else {
+                            $final_calc_value = MeasuresParameters::where('key', $measure->investment_year)->first()->value;
+                            $price_index = $yearly_value->value/$final_calc_value;
+                        }
+                        $year_value = (int)- $measure->investment_amount * $price_index;
+                    } else {
+                        $exponent = $counter - 1;
+                        $power = pow(1 + $yearly_increase_rate, $exponent);
+                        $year_value = (int)($final_savings * $power);
+                    }
+                    $cash_flows[] = $year_value;
+                    $counter++;
+                } else {
+                    break;
+                }
+            }
+            $considered_invest = abs($cash_flows[0]);
+            $e_savings = 0;
+            foreach ($energy_sources as $energy_source) {
+                $e_savings += $energy_source->pivot->measures_energy_savings;
+            }
+            $e_savings = (int)$e_savings;
+            $co2_savings = 0;
+            foreach ($energy_sources as $energy_source) {
+                $co2_savings += $energy_source->co2_emission_factor * $energy_source->pivot->measures_energy_savings;
+            }
+            $co2_savings = round($co2_savings / 1000000, 1);
+            $npv_values = array();
+            for ($i = 0; $i < count($cash_flows); $i++) {
+                if ($i >= 1 && 1 <= $measure->operating_life + 1 ) {
+                    $npv_values[] = $cash_flows[$i];
+                }
+            }
+            $npv = Finance::npv($interest_rate, $npv_values);
+            $npv = (int)round($cash_flows[0] + $npv);
+
+            $irr = (int)round(Finance::irr($cash_flows) * 100, 0);
+            if ($irr > 100) {
+                $irr_final = 100;
+            } else {
+                $irr_final = $irr;
+            }
+
+            $pv = $npv + abs($cash_flows[0]);
+            $e_cost_savings = -( - $pv * pow(1 + $interest_rate, $measure->operating_life)) /
+                ((pow(1 + $interest_rate, $measure->operating_life) - 1) / $interest_rate);
+            $e_cost_savings = (int)round($e_cost_savings, 0);
+
+            if (abs($cash_flows[1] > 1)) {
+                $pay_back = round(abs($cash_flows[0]) / $cash_flows[1], 1);
+            } else {
+                $pay_back = 'N/A';
+            }
+            $yearly_final_values = array();
+            if (!empty($cash_flows)) {
+                foreach ($cash_flows as $key => $cash_flow) {
+                    $key_pair = 'year_' . $key;
+                    $yearly_final_values[] = [
+                        $key_pair => $cash_flow,
+                    ];
+                }
+            }
+
+            $result_array = [
+                'id' => $measure->id,
+                'cash_flow' => $yearly_final_values,
+                'considered_invest' => $considered_invest,
+                'e_savings' => $e_savings,
+                'co2_savings' => $co2_savings,
+                'e_cost_savings' => $e_cost_savings,
+                'npv' => $npv,
+                'irr_percentage' => $irr,
+                'irr_round_up' => $irr_final,
+                'pay_back' => $pay_back,
+            ];
+            return response()->json([
+                'measureCalculations' => $result_array,
+                'status' => 'Success',
+                'message' => 'The Measure is successfully Calculated!',
+            ],200);
+
         } catch (Exception $exception)
         {
             return response()->json([
