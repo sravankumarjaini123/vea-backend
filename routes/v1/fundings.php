@@ -24,6 +24,8 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'fundings'], function ()
 
     Route::post('massDelete',[FundingController::class, 'massDelete'])->name('fundings.massDestroy')->middleware(['role:funding,4']);
 
+    Route::post('filter',[FundingController::class, 'indexAllFilter'])->name('fundings.filter')->middleware(['role:funding,1']);
+
     Route::post('massRestore',[FundingController::class, 'massRestore'])->name('fundings.massRestore')->middleware(['role:funding,3']);
 
     Route::post('massForceDelete',[FundingController::class, 'massForceDelete'])->name('fundings.massForceDelete')->middleware(['role:funding,4']);

@@ -111,6 +111,18 @@ class FundingController extends Controller
         }
     } // End Function
 
+    public function indexAllFilter()
+    {
+        try {
+            // TODO
+        } catch (Exception $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getLine(),
+            ], 500);
+        }
+    } // End Function
+
     public function getFundingDetails($fundings):array
     {
         $result_array = array();
