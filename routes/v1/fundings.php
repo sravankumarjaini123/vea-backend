@@ -14,7 +14,7 @@ use App\Http\Controllers\Fundings\FundingController;
 Route::group(['middleware' => ['auth:api'], 'prefix' => 'fundings'], function () {
 
     /* BEGIN -- FUNDING BODIES */
-    Route::post('filter/all',[FundingController::class, 'index'])->name('fundings.index')->middleware(['role:funding,1']);
+    Route::post('filter',[FundingController::class, 'index'])->name('fundings.index')->middleware(['role:funding,1']);
 
     Route::post('',[FundingController::class, 'store'])->name('fundings.store')->middleware(['role:funding,2']);
 
@@ -23,8 +23,6 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'fundings'], function ()
     Route::get('{id}',[FundingController::class, 'show'])->name('fundings.show')->middleware(['role:funding,1']);
 
     Route::post('massDelete',[FundingController::class, 'massDelete'])->name('fundings.massDestroy')->middleware(['role:funding,4']);
-
-    Route::post('filter',[FundingController::class, 'indexAllFilter'])->name('fundings.filter')->middleware(['role:funding,1']);
 
     Route::post('massRestore',[FundingController::class, 'massRestore'])->name('fundings.massRestore')->middleware(['role:funding,3']);
 

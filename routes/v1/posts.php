@@ -62,7 +62,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
         Route::post('visibility/{id}',[PostController::class, 'updateVisibility'])->name('posts.visibility')->middleware(['role:posts,3']);
 
-        Route::post('filter',[PostController::class, 'getFilterPosts'])->name('posts.filter')->middleware(['role:posts,3']);
+        Route::post('filter',[PostController::class, 'getFilterPosts'])->name('posts.filter')->middleware(['role:posts,1']);
         /* END -- POSTS - UPDATE */
 
         /* BEGIN -- POSTS - WORDPRESS */
