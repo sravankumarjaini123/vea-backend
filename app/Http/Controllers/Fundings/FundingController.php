@@ -78,22 +78,20 @@ class FundingController extends Controller
                     }
                 }
             }
-
-            //Filter based on Single selection
             if($funding_condition_final != null){
                 $fundings = $fundings->whereIn('id', $funding_condition_final);
             }
-            if ($request->search_keyword != null) {
+            if($request->search_keyword != null) {
                 $fundings = $fundings->where('programme', 'like', '%' . $request->search_keyword . '%');
             }
             if ($request->fundings_requirements_id != null){
-                $fundings = $fundings->where('fundings_requirements_id', $request->fundings_requirements_id);
+                $fundings = $fundings->whereIn('fundings_requirements_id', json_decode($request->fundings_requirements_id));
             }
             if ($request->fundings_types_id != null){
-                $fundings = $fundings->where('fundings_types_id', $request->fundings_types_id);
+                $fundings = $fundings->whereIn('fundings_types_id', json_decode($request->fundings_types_id));
             }
             if ($request->fundings_bodies_id != null){
-                $fundings = $fundings->where('fundings_bodies_id', $request->fundings_bodies_id);
+                $fundings = $fundings->whereIn('fundings_bodies_id', json_decode($request->fundings_bodies_id));
             }
             $total_count = count($fundings->get());
             $funding_details = $this->getFundingDetails($fundings->paginate($limit));
