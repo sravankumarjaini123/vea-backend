@@ -506,6 +506,11 @@ class ContactController extends Controller
                     $user->partners_id = $company->id;
                     $user->save();
                     $company_detail = $user->company()->first();
+                    if ($company_detail->countries_id != null) {
+                        $country_name = $company_detail->country->name;
+                    } else {
+                        $country_name = null;
+                    }
                     $company_address = [
                         'code' => $company_detail->code,
                         'name' => $company_detail->name,
@@ -517,7 +522,7 @@ class ContactController extends Controller
                         'zip_code' => $company_detail->zip_code,
                         'city' => $company_detail->city,
                         'country_id' => $company_detail->countries_id,
-                        'country' => $company_detail->country->name,
+                        'country' => $country_name,
                     ];
                     return response()->json([
                         'companyAddress' => $company_address,

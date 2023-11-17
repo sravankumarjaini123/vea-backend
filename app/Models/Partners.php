@@ -26,7 +26,7 @@ class Partners extends Model
      * Method allow to get country details of particular partner.
      * @return BelongsTo
      */
-    public function country(): BelongsTo
+    public function country():BelongsTo
     {
         return $this->belongsTo(Countries::class, 'countries_id');
     }
