@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Nette\Schema\ValidationException;
 use Illuminate\Support\Facades\DB;
 
@@ -111,10 +112,17 @@ class FundingController extends Controller
         }
     } // End Function
 
-    public function indexAllFilter()
+    public function indexAllFilter(Request $request)
     {
         try {
-            // TODO
+            $request->validate([
+                'status' => 'nullable|bool',
+            ]);
+            $fundings = DB::table('fundings')->where('deleted_at', '=', null);
+            if ($request->status != null) {
+                $fundings = $fundings->where('is_active', '=', $request->status);
+            }
+
         } catch (Exception $exception) {
             return response()->json([
                 'status' => 'Error',
