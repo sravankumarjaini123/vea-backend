@@ -43,5 +43,4 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'fundings'], function ()
 
     Route::delete('{id}',[FundingController::class, 'destroy'])->name('fundings.destroy')->middleware(['role:funding,4']);
 
-    Route::post('filter',[FundingController::class, 'getFilterFunding'])->name('fundings.filter')->middleware(['role:funding,3']);
 });
