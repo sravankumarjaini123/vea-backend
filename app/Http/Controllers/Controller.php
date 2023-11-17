@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Categories;
 use App\Models\FoldersFiles;
+use App\Models\FundingsEligibilities;
+use App\Models\FundingsStates;
+use App\Models\FundingsSubjects;
 use App\Models\Groups;
 use App\Models\Tags;
 use Carbon\Carbon;
@@ -297,5 +300,45 @@ class Controller extends BaseController
         }
         return $cryptedString;
     }
+
+    /**
+     * Method allow get the array of filter options for fundings Master data
+     * @param $model
+     * @param $data
+     * @param $condition
+     * @return array
+     */
+    public function fundingsMasterData($model, $data, $condition):array
+    {
+        $funding_ids = array();
+        $data_ids = json_decode($data);
+        foreach ($data_ids as $data_id){
+            if ($model == 'fundings_states'){
+                $funding_states = FundingsStates::where('id', $data_id)->first();
+                if (!empty($funding_states)) {
+                    $funding_ids[] = $funding_states->fundings->pluck('id')->toArray();
+                }
+            }
+            elseif ($model == 'fundings_subjects'){
+                $funding_subjects = FundingsSubjects::where('id', $data_id)->first();
+                if (!empty($funding_subjects)) {
+                    $funding_ids[] = $funding_subjects->fundings->pluck('id')->toArray();
+                }
+            }
+            else{
+                $funding_eligibilities = FundingsEligibilities::where('id', $data_id)->first();
+                if (!empty($funding_eligibilities)) {
+                    $funding_ids[] = $funding_eligibilities->fundings->pluck('id')->toArray();
+                }
+            }
+        }
+        if ($condition == 'and'){
+            $funding_condition_states = call_user_func_array('array_intersect', $funding_ids);
+        } else {
+            $funding_condition_states = call_user_func_array('array_merge',$funding_ids);
+            $funding_condition_states = array_unique($funding_condition_states);
+        }
+        return $funding_condition_states;
+    } // End Function
 
 }

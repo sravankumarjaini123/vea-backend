@@ -9,4 +9,9 @@ class FundingsSubjects extends Model
 {
     use HasFactory;
     protected $table = 'fundings_subjects';
+
+    public function fundings()
+    {
+        return $this->belongsToMany(Fundings::class, 'fundings_fundings_subjects');
+    }
 }

@@ -64,6 +64,7 @@ class MeasureController extends Controller
                     if ($measure->contact->profile_photo_id != null) {
                         $contact_person_profile_photo = $measure->contact->profilePhoto->file_path;
                     }
+
                     $contact_person_details = [
                         'firstname' => $measure->contact->firstname,
                         'lastname' => $measure->contact->lastname,
@@ -466,8 +467,11 @@ class MeasureController extends Controller
                     'energy_source_saving' => 'required'
                 ]);
                 $measure = Measures::where('id', $id)->first();
+
                 if (!$measure->energySources()->where('measures_energy_sources_id', $request->energy_source_id)->exists()) {
-                    $measure->energySources()->attach($request->energy_source_id,
+                    $measure->energySources(
+
+                    )->attach($request->energy_source_id,
                         ['measures_energy_savings' => $request->energy_source_saving]);
                 }
                 $energy_sources = $this->getEnergySourcesDetails($measure->energySources);

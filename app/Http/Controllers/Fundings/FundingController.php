@@ -3,12 +3,18 @@
 namespace App\Http\Controllers\Fundings;
 
 use App\Http\Controllers\Controller;
+use App\Models\Categories;
 use App\Models\Fundings;
+use App\Models\FundingsStates;
+use App\Models\Groups;
+use App\Models\Posts;
+use App\Models\Tags;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Exception;
 use Nette\Schema\ValidationException;
+use Illuminate\Support\Facades\DB;
 
 class FundingController extends Controller
 {
@@ -21,16 +27,88 @@ class FundingController extends Controller
     public function index(Request $request):JsonResponse
     {
         try {
-            $fundings = Fundings::all();
-            $data = $this->getFundingDetails($fundings);
+            $request->validate([
+                'is_active' => 'in:0,1',
+            ]);
+            $fundings = Fundings::where('deleted_at', '=', null);
+            if ($request->is_active != null) {
+                $fundings = $fundings->where('is_active', $request->is_active);
+            }
+            if ($request->limit == null){
+                $limit = 10;
+            } else {
+                $limit = (int)$request->limit;
+            }
+
+            // filter for Multi selection data
+            $array = array();
+            $funding_condition_states = array();
+            if (!empty($request->states_ids)) {
+                $funding_condition_states = $this->fundingsMasterData('fundings_states',$request->states_ids, 'or');
+                $array[] = $funding_condition_states;
+            }
+            $funding_condition_subjects = array();
+            if (!empty($request->subjects_ids)) {
+                $funding_condition_subjects = $this->fundingsMasterData('fundings_subjects',$request->subjects_ids, 'or');
+                $array[] = $funding_condition_subjects;
+            }
+            $funding_condition_eligibilities = array();
+            if (!empty($request->eligibilities_ids)) {
+                $funding_condition_eligibilities = $this->fundingsMasterData('fundings_eligibilities',$request->eligibilities_ids, 'or');
+                $array[] = $funding_condition_eligibilities;
+            }
+            if ($request->states_ids != null && $request->subjects_ids != null && $request->eligibilities_ids != null) {
+                $funding_condition_final = array_intersect($funding_condition_states, $funding_condition_subjects, $funding_condition_eligibilities);
+            } else {
+                $count = 0;
+                if (count($array) >= 2) {
+                    foreach ($array as $test_array) {
+                        if (!empty($test_array)) {
+                            $count++;
+                        }
+                    }
+                }
+                if ($count != count($array)) {
+                    $funding_condition_final = call_user_func_array('array_intersect', $array);
+                } else {
+                    $result = array_filter($array);
+                    $funding_condition_final = array_shift($result);
+                    foreach ($result as $filter) {
+                        $funding_condition_final = array_intersect($funding_condition_final, $filter);
+                    }
+                }
+            }
+
+            //Filter based on Single selection
+            if($funding_condition_final != null){
+                $fundings = $fundings->whereIn('id', $funding_condition_final);
+            }
+            if ($request->search_keyword != null) {
+                $fundings = $fundings->where('programme', 'like', '%' . $request->search_keyword . '%');
+            }
+            if ($request->fundings_requirements_id != null){
+                $fundings = $fundings->where('fundings_requirements_id', $request->fundings_requirements_id);
+            }
+            if ($request->fundings_types_id != null){
+                $fundings = $fundings->where('fundings_types_id', $request->fundings_types_id);
+            }
+            if ($request->fundings_bodies_id != null){
+                $fundings = $fundings->where('fundings_bodies_id', $request->fundings_bodies_id);
+            }
+            $total_count = count($fundings->get());
+            $funding_details = $this->getFundingDetails($fundings->paginate($limit));
+            $pagination_final = $this->getPaginationDetails($fundings, $limit, $total_count);
             return response()->json([
-                'funding' => $data,
-                'message' => 'Success',
+                'filterData' => $funding_details,
+                'pagination' => $pagination_final,
+                'status' => 'Success',
             ], 200);
+
         } catch (Exception $exception) {
             return response()->json([
                 'status' => 'Error',
-                'message' => $exception->getLine(),
+                'message' => $exception->getMessage(),
+                'line' => $exception->getLine(),
             ], 500);
         }
     } // End Function
@@ -575,4 +653,14 @@ class FundingController extends Controller
             ], 500);
         }
     } // End Function
+
+    /**
+     * Method allow to retrieve all the fundings with filter conditions
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+
+
+
 }
