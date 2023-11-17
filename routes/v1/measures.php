@@ -15,7 +15,7 @@ use App\Http\Controllers\Measures\MeasureController;
 Route::group(['middleware' => ['auth:api'], 'prefix' => 'measures'], function () {
 
     /* BEGIN -- MEASURE BODIES */
-    Route::get('',[MeasureController::class, 'index'])->name('measures.index')->middleware(['role:measure,1']);
+    Route::post('filter',[MeasureController::class, 'index'])->name('measures.index')->middleware(['role:measure,1']);
 
     Route::post('',[MeasureController::class, 'store'])->name('measures.store')->middleware(['role:measure,2']);
 

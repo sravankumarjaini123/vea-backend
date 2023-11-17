@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Measures;
 
 use App\Http\Controllers\Controller;
+use App\Models\Fundings;
 use App\Models\Measures;
 use App\Models\MeasuresParameters;
 use Carbon\Carbon;
@@ -25,16 +26,50 @@ class MeasureController extends Controller
     public function index(Request $request):JsonResponse
     {
         try {
-            $measures = Measures::all();
-            $data = $this->getMeasureDetails($measures);
+            $request->validate([
+                'status' => 'in:open,inProgress,complete',
+            ]);
+            $measures = Measures::where('deleted_at', '=', null);
+            if ($request->status != null) {
+                $measures = $measures->where('status', $request->status);
+            }
+            if ($request->limit == null){
+                $limit = 10;
+            } else {
+                $limit = (int)$request->limit;
+            }
+            if($request->search_keyword != null) {
+                $measures = $measures->where('name', 'like', '%' . $request->search_keyword . '%')
+                                            ->orWhere('description', 'like', '%' . $request->search_keyword . '%');
+            }
+            if ($request->measures_types_id != null){
+                $measures = $measures->whereIn('measures_types_id', json_decode($request->measures_types_id));
+            }
+            if ($request->measures_processors_id != null){
+                $measures = $measures->whereIn('measures_processors_id', json_decode($request->measures_processors_id));
+            }
+            if ($request->measures_categories_id != null){
+                $measures = $measures->whereIn('measures_categories_id', json_decode($request->measures_categories_id));
+            }
+            if ($request->industries_sectors_id != null){
+                $measures = $measures->whereIn('industries_sectors_id', json_decode($request->industries_sectors_id));
+            }
+            if ($request->contacts_persons_id != null){
+                $measures = $measures->whereIn('contacts_persons_id', json_decode($request->contacts_persons_id));
+            }
+            $total_count = count($measures->get());
+            $measure_details = $this->getMeasureDetails($measures->paginate($limit));
+            $pagination_final = $this->getPaginationDetails($measures, $limit, $total_count);
             return response()->json([
-                'measure' => $data,
-                'message' => 'Success',
+                'filterData' => $measure_details,
+                'pagination' => $pagination_final,
+                'status' => 'Success',
             ], 200);
         } catch (Exception $exception) {
             return response()->json([
                 'status' => 'Error',
-                'message' => $exception->getLine(),
+                'message' => $exception->getMessage(),
+//                'line' => $exception->getLine(),
             ], 500);
         }
     } // End Function

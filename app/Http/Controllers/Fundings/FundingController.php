@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Nette\Schema\ValidationException;
-use Illuminate\Support\Facades\DB;
+
 
 class FundingController extends Controller
 {
