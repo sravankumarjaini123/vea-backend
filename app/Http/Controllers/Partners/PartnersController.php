@@ -14,10 +14,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 use Nette\Schema\ValidationException;
 
 class PartnersController extends Controller
@@ -745,6 +747,68 @@ class PartnersController extends Controller
             ], 500);
         }
     } // End function
+
+    public function importProductionPartners(Request $request):JsonResponse
+    {
+        try {
+            $array = (object)array();
+            $excel_parameters = Excel::toArray($array, $request->media);
+            foreach ($excel_parameters[0] as $key => $excel_parameter) {
+                if ($key != 0) {
+                    $name = $excel_parameter[7];
+                    if (! Partners::where('name',$name)->exists()) {
+                        $x = 0;
+                        do {
+                            $randomString = $this->generateCode(12);
+                            if (Partners::where('code', '=', $randomString)->first()) {
+                                $x = 1;
+                            }
+                        } while ($x > 0);
+                        $partner_id = Partners::insertGetId([
+                            'code' => $randomString,
+                            'name' => $name,
+                            'countries_id' => 84,
+                            'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                        ]);
+                    } else {
+                        $partner_id = Partners::where('name', $name)->first()->id;
+                    }
+                    if ($partner_id != null) {
+                        $label_id = Labels::where('name', 'VEA')->first()->id;
+                        $partner = Partners::where('id', $partner_id)->first();
+                        $partner->partnersLabels()->attach($label_id, ['created_at' => Carbon::now()->format('Y-m-d H:i:s')]);
+                        if (!User::where('email', $excel_parameter[4])->exists()) {
+                            $password = 'Start1234@$';
+                            User::insertGetId([
+                                'salutations_id' => $excel_parameter[0],
+                                'firstname' => $excel_parameter[1],
+                                'lastname' => $excel_parameter[2],
+                                'email' => $excel_parameter[4],
+                                'password' => Hash::make($password),
+                                'address_1' => $excel_parameter[3],
+                                'city' => $excel_parameter[6],
+                                'zip_code' => $excel_parameter[5],
+                                'partners_id' => $partner_id,
+                                'country_id' => 84,
+                                'sys_admin' => 0,
+                                'sys_customer' => 1,
+                                'created_at' => Carbon::now()->format('Y-m-d H:i:s')
+                            ]);
+                        }
+                    }
+                }
+            }
+            return response()->json([
+                'status' => 'Success',
+                'message' => 'Partners and respective contacts are imported successfully.',
+            ], 200);
+        } catch (ValidationException $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception,
+            ], 500);
+        }
+    } // End Function
 
     /**
      * Method allow to update the general details of the post.
