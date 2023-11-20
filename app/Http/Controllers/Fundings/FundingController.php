@@ -174,6 +174,7 @@ class FundingController extends Controller
                     'deadline' => $funding->deadline,
                     'period' => $funding->period,
                     'sources' => json_decode($funding->source) ?? null,
+                    'is_active' => $funding->is_active,
                     'created_at' => $funding->created_at,
                     'updated_at' => $funding->updated_at,
                 ];
