@@ -810,6 +810,7 @@ class PartnersController extends Controller
         }
     } // End Function
 
+
     /**
      * Method allow to update the general details of the post.
      * @param Request $request
