@@ -328,7 +328,6 @@ class FundingController extends Controller
                         $funding->save();
                         break;
                 }
-
                 return response()->json([
                     'status' => 'Success',
                     'message' => 'Funding is Updated successfully',
