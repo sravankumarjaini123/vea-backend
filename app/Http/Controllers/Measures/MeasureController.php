@@ -69,7 +69,6 @@ class MeasureController extends Controller
             return response()->json([
                 'status' => 'Error',
                 'message' => $exception->getMessage(),
-//                'line' => $exception->getLine(),
             ], 500);
         }
     } // End Function
