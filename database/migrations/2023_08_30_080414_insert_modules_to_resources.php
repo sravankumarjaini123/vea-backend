@@ -14,7 +14,7 @@ return new class extends Migration
     {
         DB::table('resources')->insert([
             'name' => 'Industries & Sectors',
-            'slug' => 'industries_sectors',
+            'slug' => 'industries-and-sectors',
         ]);
 
         DB::table('resources')->insert([

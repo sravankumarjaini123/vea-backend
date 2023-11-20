@@ -324,7 +324,7 @@ class FundingController extends Controller
                         $funding->save();
                         break;
                     case ('status'):
-                        $funding->status = $request->data ?? 1;
+                        $funding->is_active = $request->data ?? 1;
                         $funding->save();
                         break;
                 }
