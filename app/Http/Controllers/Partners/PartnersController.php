@@ -774,9 +774,11 @@ class PartnersController extends Controller
                         $partner_id = Partners::where('name', $name)->first()->id;
                     }
                     if ($partner_id != null) {
-                        $label_id = Labels::where('name', 'VEA')->first()->id;
+                        $label_id = Labels::where('name', 'Klimafreundlicher-Mittelstand')->first()->id;
                         $partner = Partners::where('id', $partner_id)->first();
-                        $partner->partnersLabels()->attach($label_id, ['created_at' => Carbon::now()->format('Y-m-d H:i:s')]);
+                        if (!$partner->partnersLabels->isEmpty()) {
+                            $partner->partnersLabels()->attach($label_id, ['created_at' => Carbon::now()->format('Y-m-d H:i:s')]);
+                        }
                         if (!User::where('email', $excel_parameter[4])->exists()) {
                             $password = 'Start1234@$';
                             User::insertGetId([
