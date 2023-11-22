@@ -30,7 +30,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
         Route::post('filter', [PartnersController::class, 'getFilterPartners'])->name('partners.filter')->middleware(['role:partners,1']);
 
-        Route::post('import', [PartnersController::class, 'importProductionPartners'])->name('partners.filter')->middleware(['role:partners,1']);
+        // Route::post('import', [PartnersController::class, 'importProductionPartners'])->name('partners.filter')->middleware(['role:partners,1']);
 
         Route::post('general/{id}', [PartnersController::class, 'updateGeneral'])->name('partners.general')->middleware(['role:partners,3']);
 

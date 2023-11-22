@@ -455,7 +455,7 @@ class PartnersController extends Controller
         try {
             if (Partners::where('id',$id)->exists()) {
                 $partner = Partners::where('id', $id)->get();
-                $partners_details_arrays = $this->getPartnerList($partner);
+                $partners_details_arrays = $this->getPartnerList($partner, 'show');
                 $partner_details = array();
                 foreach ($partners_details_arrays as $partners_details_array) {
                     $partner_details = $partners_details_array;
@@ -517,7 +517,7 @@ class PartnersController extends Controller
      * @return array
      * @throws ValidationException
      */
-    public function getPartnerList($partners):array
+    public function getPartnerList($partners, $condition = null):array
     {
         $partners_details = array();
         if (!empty($partners)) {
@@ -550,6 +550,11 @@ class PartnersController extends Controller
                 $partner_label_details = $partner->resources;
                 $partner_resources_details = $this->getPartnersResourcesDetails($partner_label_details);
 
+                // Contacts
+                if ($condition != null) {
+                    $partners_users = $partner->users;
+                    $partners_users_details = $this->getPartnersUsersDetails($partners_users);
+                }
 
                 // Response Array
                 $partners_details[] = [
@@ -575,6 +580,7 @@ class PartnersController extends Controller
                     'logo_square_url' => $partner_logo_square_url,
                     'labels' => $partners_labels,
                     'industries_sectors' => $partners_sectors,
+                    'contacts' => $partners_users_details ?? array(),
                     'resources' => $partner_resources_details,
                     'created_by' => $partner->created_by,
                     'created_at' => $partner->created_at,
@@ -583,6 +589,44 @@ class PartnersController extends Controller
         }
         return $partners_details;
     } // End function
+
+    /**
+     * Method allow to get details of Contacts attached to the User
+     * @param $users
+     * @return array
+     */
+    public function getPartnersUsersDetails($users):array
+    {
+        $result_array = array();
+        if (!empty($users)) {
+            foreach ($users as $user) {
+                if ($user->titles_id != null) {
+                    $title = $user->title->title;
+                } else {
+                    $title = null;
+                }
+                if ($user->profile_photo_id != null) {
+                    $profile_photo_url = $user->profilePhoto->file_path;
+                } else {
+                    $profile_photo_url = null;
+                }
+                $result_array[] = [
+                    'id' => $user->id,
+                    'salutation_id' => $user->salutations_id,
+                    'salutation' => $user->salutation->salutation,
+                    'title_id' => $user->titles_id,
+                    'title' => $title,
+                    'firstname' => $user->firstname,
+                    'lastname' => $user->lastname,
+                    'email' => $user->email,
+                    'username' => $user->username,
+                    'profile_photo_id' => $user->profile_photo_id,
+                    'profile_photo_url' => $profile_photo_url,
+                ];
+            }
+        }
+        return $result_array;
+    }
 
     /**
      * Method allow to get details of Master Data by passing parameters.

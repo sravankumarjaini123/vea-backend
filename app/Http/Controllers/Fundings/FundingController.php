@@ -221,6 +221,7 @@ class FundingController extends Controller
             ]);
 
             return response()->json([
+                'funding' => $funding_id,
                 'status' => 'Success',
                 'message' => 'Funding is created successfully',
             ], 200);
