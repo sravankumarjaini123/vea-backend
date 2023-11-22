@@ -771,12 +771,20 @@ class PartnersController extends Controller
                             'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
                         ]);
                     } else {
-                        $partner_id = Partners::where('name', $name)->first()->id;
+                        $partner = Partners::where('name', $name)->first();
+                        $partner_id = $partner->id;
+                        $partner->street = $excel_parameter[3];
+                        $partner->zip_code = $excel_parameter[5];
+                        $partner->city = $excel_parameter[6];
+                        $partner->countries_id = 84;
+                        $partner->save();
                     }
                     if ($partner_id != null) {
                         $label_id = Labels::where('name', 'Klimafreundlicher-Mittelstand')->first()->id;
                         $partner = Partners::where('id', $partner_id)->first();
-                        if (!empty($partner->partnersLabels)) {
+                        $partner->partnersLabels()->detach();
+                        $partner_labels = $partner->partnerLabels;
+                        if ($partner_labels == null) {
                             $partner->partnersLabels()->attach($label_id, ['created_at' => Carbon::now()->format('Y-m-d H:i:s')]);
                         }
                         if (!User::where('email', $excel_parameter[4])->exists()) {
@@ -796,6 +804,15 @@ class PartnersController extends Controller
                                 'sys_customer' => 1,
                                 'created_at' => Carbon::now()->format('Y-m-d H:i:s')
                             ]);
+                        } else {
+                            $user = User::where('email', $excel_parameter[4])->first();
+                            $user->firstname = $excel_parameter[1];
+                            $user->lastname = $excel_parameter[2];
+                            $user->address_1 = null;
+                            $user->city = null;
+                            $user->zip_code = null;
+                            $user->country_id = null;
+                            $user->save();
                         }
                     }
                 }
