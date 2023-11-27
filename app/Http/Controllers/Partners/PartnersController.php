@@ -105,7 +105,7 @@ class PartnersController extends Controller
                 $partners = Partners::where('id', $id)->first();
                 if ($request->type === 'main_logo') {
                     $request->validate([
-                        'file_id' => 'nullable|integer'
+                        'file_id' => 'required|integer'
                     ]);
                     $partners->main_logo_file_id = $request->file_id ?? null;
                     $partners->save();
@@ -182,7 +182,7 @@ class PartnersController extends Controller
         try {
             if(Partners::where('id',$id)->exists()) {
                 $request->validate([
-                    'type' => 'required|in:logo_rectangle,logo_square',
+                    'type' => 'required|in:logo_rectangle,logo_square,main_logo',
                 ]);
                 $partners = Partners::where('id',$id)->first();
                 if ($request->type == 'logo_rectangle'){
@@ -197,6 +197,8 @@ class PartnersController extends Controller
                         }
                         if( $request->type == 'logo_rectangle') {
                             $partners->logo_rectangle_file_id = null;
+                        } elseif ($request->type == 'main_logo') {
+                            $partners->main_logo_file_id = null;
                         } else {
                             $partners->logo_square_file_id = null;
                         }
