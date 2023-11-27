@@ -61,7 +61,7 @@ class PartnersController extends Controller
         {
             return response()->json([
                 'status' => 'Error',
-                'message' => $exception->getMessage(),
+                'message' => $exception->getLine(),
             ], 500);
         }
     } // End Function
@@ -565,7 +565,7 @@ class PartnersController extends Controller
                 } else {
                     $partner_logo_square_url = null;
                 }
-                if ($partners->main_logo_file_id != null) {
+                if ($partner->main_logo_file_id != null) {
                     $partner_main_logo_url = $partners->partnerMainLogo->file_path;
                 } else {
                     $partner_main_logo_url = null;
