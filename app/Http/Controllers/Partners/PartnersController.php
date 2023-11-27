@@ -73,7 +73,7 @@ class PartnersController extends Controller
      */
     public function randomPartners(){
         try {
-            $partners = Partners::inRandomOrder()->limit(8);
+            $partners = Partners::inRandomOrder()->where('main_logo_file_id', '!=', null)->limit(8);
             $limit = 8;
             $partners_details = $this->getPartnerList($partners->paginate(8));
             return response()->json([
@@ -566,7 +566,7 @@ class PartnersController extends Controller
                     $partner_logo_square_url = null;
                 }
                 if ($partner->main_logo_file_id != null) {
-                    $partner_main_logo_url = $partners->partnerMainLogo->file_path;
+                    $partner_main_logo_url = $partner->partnerMainLogo->file_path;
                 } else {
                     $partner_main_logo_url = null;
                 }
