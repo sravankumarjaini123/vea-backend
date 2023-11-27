@@ -22,7 +22,11 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     Route::get('partners/contacts/{id}', [PartnersController::class, 'getContacts'])->name('partners.contacts')->middleware(['role:partners,1']);
 
+    Route::get('random',[PartnersController::class, 'randomPartners'])->name('partners.random')->middleware(['role:partners,1']);
+
     Route::group(['prefix' => 'partners'], function () {
+
+
 
         Route::post('filter', [PartnersController::class, 'getFilterPartners'])->name('partners.filter')->middleware(['role:partners,1']);
 

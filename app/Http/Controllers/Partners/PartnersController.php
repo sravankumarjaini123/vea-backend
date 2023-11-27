@@ -65,6 +65,28 @@ class PartnersController extends Controller
     } // End Function
 
     /**
+     * Method allow to get 8 random partners.
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function randomPartners(){
+        try {
+            $partners = Partners::inRandomOrder()->limit(8);
+            $limit = 8;
+            $partners_details = $this->getPartnerList($partners->paginate(8));
+            return response()->json([
+                'partnerDetails' => $partners_details,
+                'status' => 'Success',
+            ], 200);
+        } catch (Exception $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Method allow to update the logos of the Partners.
      * @param Request $request
      * @param $id
