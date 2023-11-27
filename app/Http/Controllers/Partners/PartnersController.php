@@ -105,7 +105,7 @@ class PartnersController extends Controller
                 $partners = Partners::where('id', $id)->first();
                 if ($request->type === 'main_logo') {
                     $request->validate([
-                        'file_id' => 'required|integer'
+                        'file_id' => 'nullable|integer'
                     ]);
                     $partners->main_logo_file_id = $request->file_id ?? null;
                     $partners->save();
