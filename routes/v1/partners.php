@@ -18,15 +18,13 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     Route::post('partners',[PartnersController::class, 'store'])->name('partners.store')->middleware(['role:partners,2']);
 
+    Route::get('partners/random',[PartnersController::class, 'randomPartners'])->name('partners.random')->middleware(['role:partners,1']);
+
     Route::get('partners/{id}',[PartnersController::class, 'show'])->name('partners.show')->middleware(['role:partners,1']);
 
     Route::get('partners/contacts/{id}', [PartnersController::class, 'getContacts'])->name('partners.contacts')->middleware(['role:partners,1']);
 
-    Route::get('random',[PartnersController::class, 'randomPartners'])->name('partners.random')->middleware(['role:partners,1']);
-
     Route::group(['prefix' => 'partners'], function () {
-
-
 
         Route::post('filter', [PartnersController::class, 'getFilterPartners'])->name('partners.filter')->middleware(['role:partners,1']);
 

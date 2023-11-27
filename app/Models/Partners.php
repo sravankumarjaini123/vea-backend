@@ -74,6 +74,14 @@ class Partners extends Model
     }
 
     /**
+     * Method allow to get Square logo of the Partner
+     */
+    public function partnerMainLogo()
+    {
+        return $this->belongsTo(FoldersFiles::class,'main_logo_file_id');
+    }
+
+    /**
      * Method allow to get collection of labels of particular partner.
      * @return BelongsToMany
      */
