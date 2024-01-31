@@ -28,6 +28,7 @@ class MeasureController extends Controller
         try {
             $request->validate([
                 'status' => 'in:open,inProgress,complete',
+                'implementation_time' => 'in:immediate,medium,slow',
             ]);
             $measures = Measures::where('deleted_at', '=', null);
             if ($request->status != null) {
@@ -56,6 +57,9 @@ class MeasureController extends Controller
             }
             if ($request->contacts_persons_id != null){
                 $measures = $measures->whereIn('contacts_persons_id', json_decode($request->contacts_persons_id));
+            }
+            if ($request->implementation_time != null){
+                $measures = $measures->where('implementation_time', $request->implementation_time);
             }
             $total_count = count($measures->get());
             $measure_details = $this->getMeasureDetails($measures->paginate($limit));
