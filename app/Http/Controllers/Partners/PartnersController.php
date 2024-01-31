@@ -99,11 +99,13 @@ class PartnersController extends Controller
             $sectors = IndustriesSectors::all();
             foreach ($sectors as $sector) {
                 $sectors_partners = $sector->industriesSectorsGroups;
-                $partner_details = $this->getBasicPartnerDetails($sectors_partners);
-                $result_array[] = [
-                    'name' => $sector->name,
-                    'partners' => $partner_details,
-                ];
+                if (!$sectors_partners->isEmpty()) {
+                    $partner_details = $this->getBasicPartnerDetails($sectors_partners);
+                    $result_array[] = [
+                        'name' => $sector->name,
+                        'partners' => $partner_details,
+                    ];
+                }
             }
             $partners = Partners::whereDoesntHave('partnersIndustriesSectors')->get();
             $no_partner_details = $this->getBasicPartnerDetails($partners);
