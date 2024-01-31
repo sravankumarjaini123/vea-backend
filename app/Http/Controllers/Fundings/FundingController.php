@@ -79,14 +79,14 @@ class FundingController extends Controller
                     }
                 }
             }
-            if($funding_condition_final != null){
+            if(isset($funding_condition_final)){
                 $fundings = $fundings->whereIn('id', $funding_condition_final);
             }
             if($request->search_keyword != null) {
                 $fundings = $fundings->where('programme', 'like', '%' . $request->search_keyword . '%');
             }
             if ($request->fundings_requirements_id != null){
-                $fundings = $fundings->whereIn('fundings_requirements_id', json_decode($request->fundings_requirements_id));
+                $fundings = $fundings->where('fundings_requirements_id', $request->fundings_requirements_id);
             }
             if ($request->fundings_types_id != null){
                 $fundings = $fundings->whereIn('fundings_types_id', json_decode($request->fundings_types_id));
