@@ -89,6 +89,69 @@ class PartnersController extends Controller
     }
 
     /**
+     * Method allow to get Partners with GroupBy of Industries and sectors
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function indexGroupBySectorsIndex():JsonResponse
+    {
+        try {
+            $sectors = IndustriesSectors::all();
+            foreach ($sectors as $sector) {
+                $sectors_partners = $sector->industriesSectorsGroups;
+                $partner_details = $this->getBasicPartnerDetails($sectors_partners);
+                $result_array[] = [
+                    'name' => $sector->name,
+                    'partners' => $partner_details,
+                ];
+            }
+            $partners = Partners::whereDoesntHave('partnersIndustriesSectors')->get();
+            $no_partner_details = $this->getBasicPartnerDetails($partners);
+            $result_array[] = ['name' => 'Unassigned', 'partners' => $no_partner_details];
+            return response()->json([
+                'partnerDetails' => $result_array ?? array(),
+                'status' => 'Success',
+            ], 200);
+        } catch (Exception $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
+    public function getBasicPartnerDetails($sectors_partners):array
+    {
+        $partner_details = array();
+        if (!empty($sectors_partners)) {
+            foreach ($sectors_partners as $sectors_partner) {
+                if ($sectors_partner->logo_rectangle_file_id != null) {
+                    $partner_logo_rectangle_url = $sectors_partner->partnerRectangleLogo->file_path;
+                } else {
+                    $partner_logo_rectangle_url = null;
+                }
+                if ($sectors_partner->logo_square_file_id != null) {
+                    $partner_logo_square_url = $sectors_partner->partnerSquareLogo->file_path;
+                } else {
+                    $partner_logo_square_url = null;
+                }
+                if ($sectors_partner->main_logo_file_id != null) {
+                    $partner_main_logo_url = $sectors_partner->partnerMainLogo->file_path;
+                } else {
+                    $partner_main_logo_url = null;
+                }
+                $partner_details[] = [
+                    'name' => $sectors_partner->name,
+                    'logo_rectangle_url' => $partner_logo_rectangle_url,
+                    'logo_square_url' => $partner_logo_square_url,
+                    'main_logo_url' => $partner_main_logo_url,
+                ];
+            }
+        }
+        return $partner_details;
+    } // End Function
+
+    /**
      * Method allow to update the logos of the Partners.
      * @param Request $request
      * @param $id

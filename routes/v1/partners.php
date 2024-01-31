@@ -20,6 +20,8 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     Route::get('partners/random',[PartnersController::class, 'randomPartners'])->name('partners.random')->middleware(['role:partners,1']);
 
+    Route::get('partners/groupBySectors',[PartnersController::class, 'indexGroupBySectorsIndex'])->name('partners.groupBy')->middleware(['role:partners,1']);
+
     Route::get('partners/{id}',[PartnersController::class, 'show'])->name('partners.show')->middleware(['role:partners,1']);
 
     Route::get('partners/contacts/{id}', [PartnersController::class, 'getContacts'])->name('partners.contacts')->middleware(['role:partners,1']);
