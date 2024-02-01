@@ -32,7 +32,7 @@ class PostController extends Controller
         try {
             $request->validate([
                 'search_keyword' => 'nullable|string|min:3|max:200',
-                'limit' => 'nullable|in:10,20,30,50'
+                'limit' => 'nullable|in:10,12,20,30,50'
             ]);
             if ($request->limit == null){
                 $limit = 10;
