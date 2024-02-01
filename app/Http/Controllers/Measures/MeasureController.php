@@ -28,7 +28,7 @@ class MeasureController extends Controller
         try {
             $request->validate([
                 'status' => 'in:open,inProgress,complete',
-                'implementation_time' => 'in:immediate,medium,slow',
+                'implementation_time' => 'nullable|in:immediate,medium,slow',
             ]);
             $measures = Measures::where('deleted_at', '=', null);
             if ($request->status != null) {
@@ -39,10 +39,7 @@ class MeasureController extends Controller
             } else {
                 $limit = (int)$request->limit;
             }
-            if($request->search_keyword != null) {
-                $measures = $measures->where('name', 'like', '%' . $request->search_keyword . '%')
-                                            ->orWhere('description', 'like', '%' . $request->search_keyword . '%');
-            }
+
             if ($request->measures_types_id != null){
                 $measures = $measures->whereIn('measures_types_id', json_decode($request->measures_types_id));
             }
@@ -54,6 +51,10 @@ class MeasureController extends Controller
             }
             if ($request->industries_sectors_id != null){
                 $measures = $measures->whereIn('industries_sectors_id', json_decode($request->industries_sectors_id));
+            }
+            if($request->search_keyword != null) {
+                $measures = $measures->where('name', 'like', '%' . $request->search_keyword . '%')
+                    ->orWhere('description', 'like', '%' . $request->search_keyword . '%');
             }
             if ($request->contacts_persons_id != null){
                 $measures = $measures->whereIn('contacts_persons_id', json_decode($request->contacts_persons_id));
@@ -173,7 +174,7 @@ class MeasureController extends Controller
             return response()->json([
                 'measureId' => $measure_id,
                 'status' => 'Success',
-                'message' => 'Funding is created successfully',
+                'message' => 'Measure is created successfully',
             ], 200);
         } catch (Exception $exception)
         {
