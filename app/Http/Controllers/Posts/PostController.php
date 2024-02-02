@@ -158,6 +158,7 @@ class PostController extends Controller
                 $post_details[] = [
                     'id' => $post->id,
                     'title' => $post->title,
+                    'introduction' => $post->introduction,
                     'post_type' => $post->post_type,
                     'post_media_id' => $post->post_file_id,
                     'post_media_name' => $post_media_name,
