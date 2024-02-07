@@ -55,7 +55,7 @@ class PostsWordpressSync implements ShouldQueue
                 $post = new PostsSyncController();
                 $post_detail = Posts::where('id', $this->posts_id)->first();
                 $return_answer = $post->postsSync($this->sites_id, $this->posts_id);
-                if ($return_answer != null) {
+                if ($return_answer->getStatusCode() != 200) {
                     Notifications::where('id', $this->notifications_id)
                         ->update(['status' => 'failed',
                             'error_message' => $return_answer->getData()->message,
@@ -69,8 +69,12 @@ class PostsWordpressSync implements ShouldQueue
                     $post_detail->wordpress()->updateExistingPivot($this->sites_id, ['sync_status' => 'lastSyncFailed']);
                     // Fail the Job
                     $this->fail($return_answer->getData());
+                    return response()->json([
+                        'status' => 'Success',
+                        'message' => $return_answer->getData()->message
+                    ], $return_answer->getStatusCode());
                 } else {
-                    if ($post_detail->shareable_type === 'wordpress' || $post_detail->shareable_type === null) {
+                    if ($post_detail->shareable_type === 'wordpress' || $post_detail->shareable_type == null) {
                         $request = new Request();
                         $request->setMethod('POST');
                         $request->request->add(['wordpress_id' => $this->sites_id]);
@@ -91,6 +95,10 @@ class PostsWordpressSync implements ShouldQueue
                     // Trigger the event for React on status update
                     $notification_event = new JobStatusNotificationController();
                     $notification_event->statusNotification($this->users_id);
+                    return response()->json([
+                        'status' => 'Success',
+                        'message' => 'The Post had synced Successfully'
+                    ], 200);
                 }
             } else{
                 PostsWordpressSync::dispatch($this->sites_id, $this->posts_id, $this->notifications_id, $this->users_id)->delay(now()->addSeconds(10));

@@ -176,10 +176,32 @@ class PostsSyncController extends WordpressController
                 $authentication = $this->authenticateUserById($wordpress->id);
                 if ($authentication) {
                     if (Posts::where('id', $post_id)->exists()) {
-                        if (!($wordpress->posts()->where('posts_id', $post_id)->exists())) {
-                            $this->syncNewPost($post_id, $wordpress->id);
+                        if ($wordpress->posts()->where('id', $post_id)->exists()) {
+                            $existing_post = $this->updateExistingPost($post_id, $wordpress->id);
+                            if ($existing_post->getStatusCode() == 200) {
+                                return response()->json([
+                                    'status' => 'Success',
+                                    'message' => 'The Post had synced with latest updates'
+                                ], 200);
+                            } else {
+                                return response()->json([
+                                    'status' => 'Error',
+                                    'message' => $existing_post->getData()->message,
+                                ], $existing_post->getStatusCode());
+                            }
                         } else {
-                            $this->updateExistingPost($post_id, $wordpress->id);
+                            $new_post = $this->syncNewPost($post_id, $wordpress->id);
+                            if ($new_post->getStatusCode() == 200) {
+                                return response()->json([
+                                    'status' => 'Success',
+                                    'message' => 'The Post had synced as a new updates'
+                                ], 200);
+                            } else {
+                                return response()->json([
+                                    'status' => 'Error',
+                                    'message' => $new_post->getData()->message,
+                                ], $new_post->getStatusCode());
+                            }
                         }
                     } else {
                         return response()->json([
@@ -232,6 +254,10 @@ class PostsSyncController extends WordpressController
                 'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ];
             $wordpress->posts()->attach($post->id, $wp_post_details);
+            return response()->json([
+                'status' => 'Success',
+                'message' => 'The Post had synced with as a new and attached at our system'
+            ], 200);
         } catch (GuzzleException $exception)
         {
             return response()->json([
@@ -251,7 +277,7 @@ class PostsSyncController extends WordpressController
         try {
             $wordpress = Wordpress::where('id',$wordpress_id)->first();
             $post = Posts::where('id', $post_id)->first();
-            $post_data = $wordpress->posts()->where('posts_id', $post_id)->first();
+            $post_data = $wordpress->posts()->where('id', $post_id)->first();
             $post_details = $this->postDetails($post_id, $wordpress->id);
             $this->authenticateUserById($wordpress->id);
             if ($post_data->pivot->wp_post_id == null){
@@ -267,19 +293,33 @@ class PostsSyncController extends WordpressController
                     'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 ];
             } else {
-                $post_id = json_decode($this->client->request(
-                    'POST',
-                    $wordpress->site_url . '/wp-json/wp/v2/posts/' . $post_data->pivot->wp_post_id . '/',
-                    ['headers' => $this->headers, 'form_params' => $post_details])
-                    ->getBody())->id;
-                // Save the data as relation for next usage
-                $wp_post_details = [
-                    'wp_post_id' => $post_id,
-                    'sync_status' => 'synced',
-                    'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                ];
+                $existing_post = json_decode($this->client->request(
+                    'GET',
+                    $wordpress->site_url . '/wp-json/wp/v2/posts/' . $post_data->pivot->wp_post_id,
+                    ['headers' => $this->headers])
+                    ->getStatusCode());
+                if ($existing_post == 200) {
+                    $post_id = json_decode($this->client->request(
+                        'POST',
+                        $wordpress->site_url . '/wp-json/wp/v2/posts/' . $post_data->pivot->wp_post_id . '/',
+                        ['headers' => $this->headers, 'form_params' => $post_details])
+                        ->getBody())->id;
+                    // Save the data as relation for next usage
+                    $wp_post_details = [
+                        'wp_post_id' => $post_id,
+                        'sync_status' => 'synced',
+                        'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                    ];
+                } else {
+                    $wordpress->posts()->detach($post_id);
+                    $this->syncNewPost($post_id, $wordpress_id);
+                }
             }
             $wordpress->posts()->updateExistingPivot($post->id, $wp_post_details);
+            return response()->json([
+                'status' => 'Success',
+                'message' => 'The Post had synced with all the latest updates'
+            ], 200);
         } catch (GuzzleException $exception)
         {
             return response()->json([
@@ -305,8 +345,7 @@ class PostsSyncController extends WordpressController
         if ($post->post_file_id != null) {
             $media_sync = new FileSyncController();
             $media_sync->MediaSyncNew($wordpress->id, $post->post_file_id, $id);
-            if ($wordpress->files()->where('files_id',$post->post_file_id)->exists())
-            {
+            if ($wordpress->files()->where('id',$post->post_file_id)->exists()) {
                 $wordpress_media = $wordpress->files()->where('files_id',$post->post_file_id)->first();
                 $featured_media = (int)$wordpress_media->pivot->wp_file_id;
             } else {
@@ -421,6 +460,7 @@ class PostsSyncController extends WordpressController
         try {
             $wordpress_site = Wordpress::where('id',$wordpress_id)->first();
             $post_data = $wordpress_site->posts()->where('posts_id', $post_id)->first();
+            $wordpress_site->posts()->detach($post_id);
             if ($post_data->pivot->wp_post_id != null) {
                 $authentication = $this->authenticateUserById($wordpress_site->id);
                 $post_details = json_decode($this->client->request(
@@ -429,7 +469,6 @@ class PostsSyncController extends WordpressController
                     ['headers' => $this->headers, 'form_params'])
                     ->getBody());
             }
-            $wordpress_site->posts()->detach($post_id);
             return true;
         } catch (GuzzleException $exception)
         {

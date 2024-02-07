@@ -22,7 +22,7 @@ class Wordpress extends Model
      */
     public function posts()
     {
-        return $this->belongsToMany(Posts::class, 'wordpress_posts')->withPivot(['wp_post_id', 'sync_status', 'updated_at']);
+        return $this->belongsToMany(Posts::class, 'wordpress_posts', 'wordpress_id', 'posts_id')->withPivot(['wp_post_id', 'sync_status', 'updated_at']);
     }
     /**
      * Get the tags of the Wordpress.

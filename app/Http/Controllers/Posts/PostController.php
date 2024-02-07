@@ -1225,7 +1225,7 @@ class PostController extends Controller
                 'message' => $exception->getMessage(),
             ], 500);
         }
-    }
+    } // End Function
 
     /**
      * Method allow to update the status of the post.
