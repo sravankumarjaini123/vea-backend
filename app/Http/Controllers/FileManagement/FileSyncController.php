@@ -127,15 +127,14 @@ class FileSyncController extends WordpressController
             $wordpress = Wordpress::where('id', $wordpress_id)->first();
             $authentication = $this->authenticateUserById($wordpress->id);
             $media = FoldersFiles::where('id', $file_id)->first();
-
             if (env('DISK_DRIVER') === 'mounted'){
                 $disk = 'volume';
             } else {
                 $disk = 'media';
             }
-            $source_url = Storage::disk($disk)->path($media->hashname);
+            $source_url = Storage::disk($disk)->path($media->hash_name);
             $basename = basename($media->file_path);
-            $source_url = $source_url.$basename;
+            // $source_url = $source_url.$basename;
             $fdata = file_get_contents($source_url, false);
 
             $this->headers = array_merge([
