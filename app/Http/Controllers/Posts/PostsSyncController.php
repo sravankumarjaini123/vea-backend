@@ -251,9 +251,10 @@ class PostsSyncController extends WordpressController
             // Save the data as relation for next usage
             $wp_post_details = [
                 'wp_post_id' => $post_id,
+                'sync_status' => 'synced',
                 'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
             ];
-            $wordpress->posts()->attach($post->id, $wp_post_details);
+            $wordpress->posts()->updateExistingPivot($post->id, $wp_post_details);
             return response()->json([
                 'status' => 'Success',
                 'message' => 'The Post had synced with as a new and attached at our system'
