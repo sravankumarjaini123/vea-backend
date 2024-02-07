@@ -37,7 +37,7 @@ class SyncStatus extends Command
         $image_notifications = Notifications::where('notification_type', 'image_optimization')
             ->where('status', '=', 'processing')->where('created_at','<',$date_image)->get();
 
-        /*if (!empty($notifications)) {
+        if (!empty($notifications)) {
             foreach ($notifications as $notification) {
                 $post = Posts::where('id', $notification->data_id)->first();
                 $wordpress = Wordpress::where('name', $notification->data_channel)->first();
@@ -47,7 +47,7 @@ class SyncStatus extends Command
                     'error_message' => 'Connection time out'
                 ]);
             }
-        }*/
+        }
         if (!empty($image_notifications)) {
             foreach ($image_notifications as $image_notification){
                 $notification_detail = Notifications::where('id', $image_notification->id)->first();
