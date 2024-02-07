@@ -74,7 +74,7 @@ class PostsWordpressSync implements ShouldQueue
                         'message' => $return_answer->getData()->message
                     ], $return_answer->getStatusCode());
                 } else {
-                    if ($post_detail->shareable_type === 'wordpress' || $post_detail->shareable_type == null) {
+                    if ($post_detail->shareable_type === 'wordpress' || empty($post_detail->shareable_type)) {
                         $request = new Request();
                         $request->setMethod('POST');
                         $request->request->add(['wordpress_id' => $this->sites_id]);

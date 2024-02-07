@@ -245,7 +245,7 @@ class PostsSyncController extends WordpressController
             $this->authenticateUserById($wordpress->id);
             $post_id = json_decode($this->client->request(
                 'POST',
-                $wordpress->site_url . '/wp-json/wp/v2/posts/',
+                $wordpress->site_url . '/wp-json/wp/v2/posts',
                 ['headers' => $this->headers, 'form_params' => $post_details])
                 ->getBody())->id;
             // Save the data as relation for next usage
@@ -284,7 +284,7 @@ class PostsSyncController extends WordpressController
             if ($post_data->pivot->wp_post_id == null){
                 $post_id = json_decode($this->client->request(
                     'POST',
-                    $wordpress->site_url . '/wp-json/wp/v2/posts/',
+                    $wordpress->site_url . '/wp-json/wp/v2/posts',
                     ['headers' => $this->headers, 'form_params' => $post_details])
                     ->getBody())->id;
                 // Save the data as relation for next usage
