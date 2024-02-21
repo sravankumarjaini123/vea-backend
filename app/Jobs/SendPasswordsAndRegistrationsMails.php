@@ -51,7 +51,7 @@ class SendPasswordsAndRegistrationsMails implements ShouldQueue
         $email_template_details = EmailsTemplates::where('id', $this->email_template_id)->first();
         $emails_settings = EmailsSettings::where('id', $this->email_setting_id)->first();
         $user = User::where('id', $this->user_id)->first();
-        if ($this->condition === 'system_forgot_password') {
+        if ($this->condition === 'system_forgot_password' || $this->condition === 'app_forgot_password') {
             $code = UsersForgotPasswords::where('id', $this->code_id)->first();
         }
 
@@ -69,6 +69,8 @@ class SendPasswordsAndRegistrationsMails implements ShouldQueue
         // Check the purpose and replace the link for redirection
         if ($this->condition === 'system_forgot_password'){
             $description = str_replace('{{%system_forgot_password_link%}}', $code->base64_email, $description);
+        } elseif ($this->condition === 'app_forgot_password') {
+            $description = str_replace('{{%app_forgot_password_link%}}', $code->base64_email, $description);
         }
 
         // Configure the Mail system and Send the Mail

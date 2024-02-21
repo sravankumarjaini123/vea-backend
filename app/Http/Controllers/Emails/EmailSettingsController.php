@@ -20,8 +20,9 @@ class EmailSettingsController extends Controller
     {
         try {
             $system_settings = EmailsSettings::where('technologies', 'system')->get();
-            $newsletteres_settings = EmailsSettings::where('technologies','newsletters')->get();
-            $query = array_merge(['system' => $system_settings],['newsletters' => $newsletteres_settings]);
+            $app_settings = EmailsSettings::where('technologies','app')->get();
+            $news_letters_settings = EmailsSettings::where('technologies','newsletters')->get();
+            $query = array_merge(['system' => $system_settings], ['app' => $app_settings], ['newsletters' => $news_letters_settings]);
             return response()->json([
                 'emailsSettingsDetails' => $query,
                 'message' => 'Success',
@@ -44,7 +45,7 @@ class EmailSettingsController extends Controller
     {
         try {
             $request->validate([
-                'technology' => 'required|in:system,newsletters',
+                'technology' => 'required|in:system,newsletters,app',
                 'name' => 'required',
             ]);
 

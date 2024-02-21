@@ -662,11 +662,14 @@ class UserController extends Controller
     {
         try {
             $request->validate([
-                'technology' => 'required|in:system',
+                'technology' => 'required|in:system,app',
             ]);
             if ($request->technology === 'system'){
                 $user = User::where('email', $request->email)->where('sys_admin',1)->first();
                 $condition = 'system_forgot_password';
+            } else {
+                $user = User::where('email', $request->email)->first();
+                $condition = 'app_forgot_password';
             }
             if (!empty($user)){
                 $email_settings_details = EmailsSettings::where('technologies', $request->technology)
