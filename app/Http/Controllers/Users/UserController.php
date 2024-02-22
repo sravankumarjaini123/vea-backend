@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
 use Laravel\Passport\RefreshToken;
 use Laravel\Passport\Token;
 use Nette\Schema\ValidationException;
