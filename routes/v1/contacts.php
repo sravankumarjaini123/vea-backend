@@ -72,6 +72,8 @@ Route::group(['middleware' => ['auth:api']], function () {
 
         Route::post('labels/{id}', [UserController::class, 'updateLabels'])->name('contact.update.labels')->middleware(['role:contacts,3']);
 
+        Route::post('sendInfo/{id}', [UserController::class, 'sendAccountInfo'])->name('contact.send.info')->middleware(['role:users,3']);
+
         Route::post('state/{id}', [ContactController::class, 'updateState'])->name('contact.update.block')->middleware(['role:contacts,3']);
 
         Route::post('verification/email/{id}', [ContactController::class, 'emailWithCodeConfirmation'])->name('contact.update.block')->middleware(['role:contacts,1']);

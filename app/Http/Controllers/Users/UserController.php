@@ -157,6 +157,49 @@ class UserController extends Controller
     } // End Function
 
     /**
+     * Method allow to Send the Account Info of Contact through Mail
+     * @param $id
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function sendAccountInfo($id):JsonResponse
+    {
+        try {
+            $user = User::where('id',$id)->first();
+            if (!empty($user)) {
+                $email_settings_details = EmailsSettings::where('technologies', 'app')
+                    ->where('name', 'send_account_info')->first();
+                if ($email_settings_details->emails_id != null && $email_settings_details->emails_templates_id != null) {
+                    $email_id = $email_settings_details->emails_id;
+                    $email_template_id = $email_settings_details->emails_templates_id;
+                    $condition = 'send_account_info';
+                    SendPasswordsAndRegistrationsMails::dispatch($email_id, $email_template_id, $user->id, null, $condition, $email_settings_details->id);
+                    return response()->json([
+                        'status' => 'Success',
+                        'message' => 'Mail was sent with Account Details to the Respective Contact'
+                    ], 200);
+
+                } else {
+                    return response()->json([
+                        'status' => 'Error',
+                        'message' => 'Email settings are not been set, please contact administrator!!!',
+                    ], 422);
+                }
+            } else{
+                return response()->json([
+                    'status' => 'No Content',
+                    'message' => 'There is no relevant information for selected query'
+                ],210);
+            }
+        } catch (Exception $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Method allow to update the new email/username.
      * @param $id
      * @return JsonResponse

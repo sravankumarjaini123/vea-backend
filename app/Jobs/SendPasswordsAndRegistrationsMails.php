@@ -13,7 +13,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class SendPasswordsAndRegistrationsMails implements ShouldQueue
 {
@@ -55,13 +57,19 @@ class SendPasswordsAndRegistrationsMails implements ShouldQueue
             $code = UsersForgotPasswords::where('id', $this->code_id)->first();
         }
 
+        $password = Str::random(16);
+        if ($this->condition === 'send_account_info') {
+            $user->password = Hash::make($password);
+            $user->save();
+        }
+
         // Convert the General Placeholders
         $description = $email_template_details->description;
         $conversion = new PlaceholderConversionController();
         $description = $conversion->convertPlaceholdersForUser($description, $user->id);
 
         // Replace the Code for any Forgot password
-        if( $code ) {
+        if( !empty($code) ) {
             $description = str_replace('{{%code%}}', $code->code, $description);
         }
         $subject = $emails_settings->subject;
@@ -71,6 +79,8 @@ class SendPasswordsAndRegistrationsMails implements ShouldQueue
             $description = str_replace('{{%system_forgot_password_link%}}', $code->base64_email, $description);
         } elseif ($this->condition === 'app_forgot_password') {
             $description = str_replace('{{%app_forgot_password_link%}}', $code->base64_email, $description);
+        } elseif ($this->condition === 'send_account_info') {
+            $description = str_replace('{{%contact_password%}}', $password, $description);
         }
 
         // Configure the Mail system and Send the Mail
@@ -79,7 +89,7 @@ class SendPasswordsAndRegistrationsMails implements ShouldQueue
         config(['mail.mailers.smtp.username' => $email_details->username]);
         config(['mail.mailers.smtp.password' => $email_details->password]);
         config(['mail.mailers.smtp.port' => $email_details->port]);
-        Mail::send([], [], function ($message) use ($user, $email_details, $description, $code, $subject) {
+        Mail::send([], [], function ($message) use ($user, $email_details, $description, $subject) {
             $message->to($user->email, $user->firstname)->subject($subject);
             $message->html($description, 'text/html');
             $message->from($email_details->senders_address, $email_details->senders_name);
