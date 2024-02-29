@@ -379,6 +379,27 @@ class PartnersController extends Controller
         }
     } // End Function
 
+    public function importPartnersResources(Request $request):JsonResponse
+    {
+        try {
+            $partners = Partners::all();
+            if (!empty($partners)) {
+                foreach ($partners as $partner) {
+                    $update = $this->updateResources($request, $partner->id);
+                }
+            }
+            return response()->json([
+                'status' => 'Success',
+                'message' => 'Resources had been assigned Successfully'
+            ], 200);
+        } catch (ValidationException $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception,
+            ], 500);
+        }
+    } // End Function
+
     /**
      * Method allow to assign the Labels for Partners.
      * @param Request $request
@@ -965,6 +986,8 @@ class PartnersController extends Controller
             ], 500);
         }
     } // End Function
+
+
 
 
     /**
