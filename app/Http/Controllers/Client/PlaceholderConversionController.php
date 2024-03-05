@@ -16,14 +16,14 @@ class PlaceholderConversionController extends Controller
         if (str_contains($description, '{{%salutation_formal%}}')) {
             $salutation_message = Lang::get('messages.salutation_formal', [], $locale);
             $description = str_replace('{{%salutation_formal%}}', $salutation_message .
-                ' ' . $salutation .
+                ' ' . $salutation ?? null .
                 ' ' . $firstname .
                 ' ' . $lastname, $description);
         }
         if (str_contains($description, '{{%salutation_informal%}}')) {
             $salutation_message = Lang::get('messages.salutation_informal', [], $locale);
             $description = str_replace('{{%salutation_informal%}}', $salutation_message .
-                ' ' . $salutation .
+                ' ' . $salutation ?? null .
                 ' ' . $firstname .
                 ' ' . $lastname, $description);
         }
@@ -61,7 +61,12 @@ class PlaceholderConversionController extends Controller
     public function convertPlaceholdersForUser($description, $user_id)
     {
         $user = User::where('id', $user_id)->first();
-        return $this->convertPlaceholders($description, $user->salutation->salutation, $user->firstname, $user->lastname, $user->email);
+        if ($user->salutations_id != null ) {
+            $salutation = $user->salutation->salutation;
+        } else {
+            $salutation = null;
+        }
+        return $this->convertPlaceholders($description, $salutation, $user->firstname, $user->lastname, $user->email);
     } // End Function
 
     /**

@@ -168,6 +168,12 @@ class ContactController extends Controller
     {
         $result_array = array();
         if (!empty($customer_detail)) {
+            if ($customer_detail->salutations_id != null) {
+                $salutation = $customer_detail->salutation->salutation;
+            } else {
+                $salutation = null;
+            }
+
             if ($customer_detail->titles_id != null) {
                 $title = $customer_detail->title->title;
             } else {
@@ -185,7 +191,7 @@ class ContactController extends Controller
             $personal_details = [
                 'id' => $customer_detail->id,
                 'salutation_id' => $customer_detail->salutations_id,
-                'salutation' => $customer_detail->salutation->salutation,
+                'salutation' => $salutation,
                 'title_id' => $customer_detail->titles_id,
                 'title' => $title,
                 'firstname' => $customer_detail->firstname,

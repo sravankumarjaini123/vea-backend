@@ -9,6 +9,7 @@ use App\Http\Controllers\Users\AuthenticationController;
 use App\Http\Controllers\Client\CountryController;
 use App\Http\Controllers\Client\LanguageController;
 use App\Http\Controllers\LegalTexts\LegalTextController;
+use App\Http\Controllers\ContactForms\ContactFormController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -103,6 +104,8 @@ Route::group(['middleware' => config('fortify.middleware', ['web']),'prefix' => 
     Route::get('system/legalTexts/{id}', [LegalTextController::class, 'showDetailWithId'])->name('legalTexts.show.Detail.id');
 
     Route::post('refreshToken', [AuthenticationController::class, 'issueToken'])->name('api.client.refreshToken');
+
+    Route::post('contactForm/register/contact', [ContactFormController::class, 'registerContactFromContactForm'])->name('client.register.contactForm');
 
 
 });
