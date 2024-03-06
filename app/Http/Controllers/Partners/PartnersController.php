@@ -678,6 +678,9 @@ class PartnersController extends Controller
                     'address_2' => $partner->street_extra,
                     'zip_code' => $partner->zip_code,
                     'city' => $partner->city,
+                    'email' => $partner->email,
+                    'website' => $partner->website,
+                    'telephone' => $partner->telephone,
                     'country_id' => $partner->countries_id,
                     'country_name' => $country_name,
                     'country_emoji' => $country_emoji,
@@ -1012,6 +1015,9 @@ class PartnersController extends Controller
                 $partners->street_extra = $request->address_2;
                 $partners->zip_code = $request->zip_code;
                 $partners->city = $request->city;
+                $partners->email = $request->email;
+                $partners->telephone = $request->telephone;
+                $partners->website = $request->website;
                 $partners->countries_id = $request->country_id;
                 $partners->save();
 
@@ -1030,6 +1036,9 @@ class PartnersController extends Controller
                     'address_2' => $partners->street_extra,
                     'zip_code' => (int)$partners->zip_code,
                     'city' => $partners->city,
+                    'email' => $partners->email,
+                    'website' => $partners->website,
+                    'telephone' => $partners->telephone,
                     'country_id' => (int)$partners->countries_id,
                     'country_name' => $country_name,
                     'country_emoji' => $country_emoji,
