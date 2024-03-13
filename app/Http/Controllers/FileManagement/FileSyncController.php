@@ -39,7 +39,9 @@ class FileSyncController extends WordpressController
                 $wp_array_medias = array();
                 foreach ($check_medias as $check_media){
                     if ($check_media->media_type != 'file'){
-                        $wp_array_medias[] = $check_media->media_details->file;
+                        if (property_exists($check_media->media_details, 'file')) {
+                            $wp_array_medias[] = $check_media->media_details->file;
+                        }
                     }
                 }
                 $file = FoldersFiles::where('id',$file_id)->first();
@@ -58,10 +60,13 @@ class FileSyncController extends WordpressController
                         [ 'headers' => $this->headers, 'form_params'] )->getBody() );
                     $wp_array_medias_2 = array();
                     foreach ($check_medias_2 as $check_media_2){
-                        $wp_array_medias_2[] = [
-                            'id' => $check_media_2->id,
-                            'name' => $check_media_2->media_details->file,
-                        ];
+                        if (property_exists($check_media_2->media_details, 'file')) {
+                            $check_media_name = $check_media_2->media_details->file;
+                            $wp_array_medias_2[] = [
+                                'id' => $check_media_2->id,
+                                'name' => $check_media_name,
+                            ];
+                        }
                     }
                     foreach ($wp_array_medias_2 as $wp_array_media_2){
                         if ($file_name == $wp_array_media_2['name']){
