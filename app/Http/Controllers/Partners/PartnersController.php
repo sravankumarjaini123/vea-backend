@@ -252,6 +252,8 @@ class PartnersController extends Controller
                 $partners = Partners::where('id',$id)->first();
                 if ($request->type == 'logo_rectangle'){
                     $file_name = $partners->logo_rectangle_file_id;
+                } elseif ($request->type == 'main_logo'){
+                    $file_name = $partners->main_logo_file_id;
                 } else {
                     $file_name = $partners->logo_square_file_id;
                 }
