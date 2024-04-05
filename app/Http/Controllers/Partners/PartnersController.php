@@ -1009,7 +1009,6 @@ class PartnersController extends Controller
                 $partners = Partners::where('id', $id)->first();
                 $request->validate([
                     'name' => ['required', 'string', Rule::unique('partners', 'name')->ignore($partners->id)],
-                    'zip_code' => 'nullable|integer',
                 ]);
 
                 $partners->name = $request->name;
@@ -1036,7 +1035,7 @@ class PartnersController extends Controller
                     'name' => $partners->name,
                     'address_1' => $partners->street,
                     'address_2' => $partners->street_extra,
-                    'zip_code' => (int)$partners->zip_code,
+                    'zip_code' => $partners->zip_code,
                     'city' => $partners->city,
                     'email' => $partners->email,
                     'website' => $partners->website,
