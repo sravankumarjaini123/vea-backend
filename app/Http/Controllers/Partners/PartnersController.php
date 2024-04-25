@@ -147,6 +147,7 @@ class PartnersController extends Controller
                     'logo_rectangle_url' => $partner_logo_rectangle_url,
                     'logo_square_url' => $partner_logo_square_url,
                     'main_logo_url' => $partner_main_logo_url,
+                    'website' => $sectors_partner->website,
                 ];
             }
         }
