@@ -818,6 +818,7 @@ class PartnersController extends Controller
             }
             if ($request->zip_code != null) {
                 $partners = $partners->where('zip_code', '=', (int)$request->zip_code);
+//                dd($partners);
             }
             if ($request->search_keyword != null){
                 $keyword = $request->search_keyword;
@@ -850,7 +851,7 @@ class PartnersController extends Controller
                 $partners = $partners->whereIn('id', $partner_condition_group);
             }
             $partners_details = $this->getPartnerList($partners->paginate($limit));
-            $pagination_details = $this->getPaginationDetails($partners, $limit, count($partners->get()));
+            $pagination_details = $this->getPaginationDetails($partners, $limit, $partners->count());
             return response()->json([
                 'partnerDetails' => $partners_details,
                 'partners_pagination' => $pagination_details,
@@ -992,8 +993,6 @@ class PartnersController extends Controller
             ], 500);
         }
     } // End Function
-
-
 
 
     /**
