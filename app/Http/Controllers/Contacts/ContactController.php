@@ -356,8 +356,9 @@ class ContactController extends Controller
                     $query->orwhere('email', 'like', '%' . $keyword . '%');
                 });
             }
+            $total_count = $contacts->count();
             $contacts_details = $this->getContactDetailsOverview($contacts->paginate($limit));
-            $pagination_details = $this->getPaginationDetails($contacts, $limit, count($contacts->get()));
+            $pagination_details = $this->getPaginationDetails($contacts, $limit, $total_count);
             return response()->json([
                 'customers' => $contacts_details,
                 'customers_pagination' => $pagination_details,

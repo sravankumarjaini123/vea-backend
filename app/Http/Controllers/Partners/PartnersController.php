@@ -850,8 +850,9 @@ class PartnersController extends Controller
                 $partner_condition_group = array_unique($final_array);
                 $partners = $partners->whereIn('id', $partner_condition_group);
             }
+            $total_count = $partners->count();
             $partners_details = $this->getPartnerList($partners->paginate($limit));
-            $pagination_details = $this->getPaginationDetails($partners, $limit, $partners->count());
+            $pagination_details = $this->getPaginationDetails($partners, $limit, $total_count);
             return response()->json([
                 'partnerDetails' => $partners_details,
                 'partners_pagination' => $pagination_details,
