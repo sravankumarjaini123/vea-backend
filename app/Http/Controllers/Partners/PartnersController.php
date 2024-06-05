@@ -98,7 +98,7 @@ class PartnersController extends Controller
         try {
             $sectors = IndustriesSectors::all();
             foreach ($sectors as $sector) {
-                $sectors_partners = $sector->industriesSectorsGroups;
+                $sectors_partners = $sector->industriesSectorsGroups()->orderBy('name')->get();
                 if (!$sectors_partners->isEmpty()) {
                     $partner_details = $this->getBasicPartnerDetails($sectors_partners);
                     $result_array[] = [
