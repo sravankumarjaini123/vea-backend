@@ -50,6 +50,12 @@ class ContactFormController extends Controller
                             'website' => $request->website ?? null,
                         ]);
                         (new PartnersController())->updateGeneral($update_partner_request, $partner_id);
+                        if (!empty($request->industries_sectors_id)) {
+                            $sectors_request = new Request();
+                            $sectors_request->setMethod('post');
+                            $sectors_request->request->add(['industries_sectors_id' => $request->industries_sectors_id]);
+                            (new PartnersController())->updateIndustriesSectors($sectors_request, $partner_id);
+                        }
 
                     } else {
                         return response()->json([

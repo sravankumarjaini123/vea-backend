@@ -50,7 +50,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
         Route::post('labels/{id}', [PartnersController::class, 'updateLabels'])->name('partners.updateLabels')->middleware(['role:partners,3']);
 
-        Route::post('industries/sectors/{id}', [PartnersController::class, 'updateIndustriesSectors'])->name('partners.updateIndustriesSectors')->middleware(['role:partners,3']);
+        Route::post('industries/sectors/{id}', [PartnersController::class, 'updateIndustriesSectors'])->name('partners.updateIndustriesSectors');
 
         /* END - MASTER DATA */
 

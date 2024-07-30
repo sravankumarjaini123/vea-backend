@@ -226,7 +226,10 @@ class ContactController extends Controller
             // Get Company address details of particular contact
             if ($customer_detail->partners_id != null) {
                 $company = $customer_detail->company()->first();
+                $partner = Partners::where('id', $company->id)->first();
+                $partners_sectors = (new PartnersController())->getPartnersDetails($partner->partnersIndustriesSectors);
                 $company_address = [
+                    'id' => $partner->id,
                     'code' => $company->code,
                     'name' => $company->name,
                     'email' => $company->email,
@@ -238,6 +241,7 @@ class ContactController extends Controller
                     'city' => $company->city,
                     'country_id' => $company->countries_id,
                     'country' => (!empty($company->country)) ? $company->country->name : '',
+                    'sectors' => $partners_sectors,
                 ];
             } else {
                 $company_address = null;
