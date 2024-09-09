@@ -22,6 +22,8 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     Route::get('partners/groupBySectors',[PartnersController::class, 'indexGroupBySectorsIndex'])->name('partners.groupBy')->middleware(['role:partners,1']);
 
+    Route::get('partners/logos/report', [PartnersController::class, 'getLogoReportForPartners'])->name('partners.logoReports');
+
     Route::get('partners/{id}',[PartnersController::class, 'show'])->name('partners.show')->middleware(['role:partners,1']);
 
     Route::get('partners/contacts/{id}', [PartnersController::class, 'getContacts'])->name('partners.contacts')->middleware(['role:partners,1']);
@@ -51,6 +53,8 @@ Route::group(['middleware' => ['auth:api']], function () {
         Route::post('labels/{id}', [PartnersController::class, 'updateLabels'])->name('partners.updateLabels')->middleware(['role:partners,3']);
 
         Route::post('industries/sectors/{id}', [PartnersController::class, 'updateIndustriesSectors'])->name('partners.updateIndustriesSectors');
+
+
 
         /* END - MASTER DATA */
 

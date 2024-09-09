@@ -122,6 +122,56 @@ class PartnersController extends Controller
         }
     } // End Function
 
+    /**
+     * Method allow to get Partners with no logos for it.
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function getLogoReportForPartners():JsonResponse
+    {
+        try {
+            $partners = DB::table('partners')->where('logo_rectangle_file_id', '=', null)->get();
+
+            if (!$partners->isEmpty()) {
+                $partners_array = array();
+                foreach ($partners as $partner) {
+                    $partner_list = Partners::where('id', $partner->id)->first();
+                    $contacts = $partner_list->users;
+                    if (!$contacts->isEmpty()) {
+                        $contacts_array = array();
+                        foreach ($contacts as $contact) {
+                            $contacts_array[] = [
+                                'salutation' => $contact->salutation->salutation,
+                                'firstname' => $contact->firstname,
+                                'lastname' => $contact->lastname,
+                                'email' => $contact->email,
+                            ];
+                        }
+                        $partners_array[] = [
+                            'name' => $partner->name,
+                            'contacts' => $contacts_array ?? array(),
+                        ];
+                    }
+                }
+                return response()->json([
+                    'partnerDetails' => $partners_array ?? array(),
+                    'status' => 'Success',
+                    'message' => 'There are no partners without Logos',
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => 'Warning',
+                    'message' => 'There are no partners without Logos',
+                ], 210);
+            }
+        } catch (Exception $exception) {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $exception->getMessage(),
+            ], 500);
+        }
+    } // End Function
+
     public function getBasicPartnerDetails($sectors_partners):array
     {
         $partner_details = array();
