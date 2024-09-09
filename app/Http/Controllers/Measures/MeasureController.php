@@ -28,7 +28,7 @@ class MeasureController extends Controller
         try {
             $request->validate([
                 'status' => 'in:open,inProgress,complete',
-                'implementation_time' => 'nullable|in:immediate,medium,slow',
+                'implementation_time' => 'nullable|in:immediate,medium,slow,longTerm',
             ]);
             $measures = Measures::where('deleted_at', '=', null);
             if ($request->status != null) {
@@ -424,7 +424,7 @@ class MeasureController extends Controller
                 }
                 if ($request->type === 'implementation_time') {
                     $request->validate([
-                        'data' => 'nullable|in:immediate,medium,slow'
+                        'data' => 'nullable|in:immediate,medium,slow,longTerm'
                     ]);
                 }
                 if ($request->type === 'company_size') {
