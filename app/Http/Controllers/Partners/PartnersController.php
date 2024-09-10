@@ -140,8 +140,13 @@ class PartnersController extends Controller
                     if (!$contacts->isEmpty()) {
                         $contacts_array = array();
                         foreach ($contacts as $contact) {
+                            if ($contact->salutations_id != null ) {
+                                $salutation = $contact->salutation->salutation;
+                            } else {
+                                $salutation = null;
+                            }
                             $contacts_array[] = [
-                                'salutation' => $contact->salutation->salutation,
+                                'salutation' => $salutation,
                                 'firstname' => $contact->firstname,
                                 'lastname' => $contact->lastname,
                                 'email' => $contact->email,
