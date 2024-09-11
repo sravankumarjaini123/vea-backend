@@ -130,7 +130,7 @@ class PartnersController extends Controller
     public function getLogoReportForPartners():JsonResponse
     {
         try {
-            $partners = DB::table('partners')->where('logo_rectangle_file_id', '=', null)->get();
+            $partners = DB::table('partners')->where('main_logo_file_id', '=', null)->get();
 
             if (!$partners->isEmpty()) {
                 $partners_array = array();
