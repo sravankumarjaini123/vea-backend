@@ -90,7 +90,7 @@ class ContactFormController extends Controller
                 $license_request = new Request();
                 $license_request->setMethod('post');
                 $license_request->request->add([
-                    'resources_id' => [19, 21, 17, 18, 20, 2]
+                    'resources_id' => [19, 21, 17, 18, 20, 2, 22]
                 ]);
                 (new PartnersController())->updateResources($license_request, $partner_id);
 

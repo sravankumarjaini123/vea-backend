@@ -142,21 +142,42 @@ class FundingController extends Controller
                 $funding_states = $this->getMasterDataForFunding($funding->states);
                 $funding_subjects = $this->getMasterDataForFunding($funding->subjects);
                 $funding_eligibilities = $this->getMasterDataForFunding($funding->eligibilities);
+                // Requirements
                 if ($funding->fundings_requirements_id != null ) {
                     $funding_requirement_name = $funding->requirement->name;
                 } else {
                     $funding_requirement_name = null;
                 }
+                // Funding Types
                 if ($funding->fundings_types_id != null ) {
                     $funding_type_name = $funding->type->name;
                 } else {
                     $funding_type_name = null;
                 }
+                // Funding Bodies
                 if ($funding->fundings_bodies_id != null ) {
                     $funding_body_name = $funding->body->name;
                 } else {
                     $funding_body_name = null;
                 }
+                // Contact Persons
+                if ($funding->contacts_persons_id != null) {
+                    if ($funding->contact->partners_id != null) {
+                        $contact_person_partner_name = $funding->contact->company->name;
+                    }
+                    if ($funding->contact->profile_photo_id != null) {
+                        $contact_person_profile_photo = $funding->contact->profilePhoto->file_path;
+                    }
+
+                    $contact_person_details = [
+                        'firstname' => $funding->contact->firstname,
+                        'lastname' => $funding->contact->lastname,
+                        'email' => $funding->contact->email,
+                        'profile_photo' => $contact_person_profile_photo ?? null,
+                        'company_name' =>  $contact_person_partner_name ?? null,
+                    ];
+                }
+
                 $result_array[] = [
                     'id' => $funding->id,
                     'states' => $funding_states,
@@ -175,6 +196,7 @@ class FundingController extends Controller
                     'period' => $funding->period,
                     'sources' => json_decode($funding->source) ?? null,
                     'is_active' => $funding->is_active,
+                    'contact_person_details' => $contact_person_details ?? (object)array(),
                     'created_at' => $funding->created_at,
                     'updated_at' => $funding->updated_at,
                 ];
@@ -365,7 +387,7 @@ class FundingController extends Controller
         try {
             if (Fundings::where('id', $id)->exists()) {
                 $request->validate([
-                    'type' => 'required|in:state,subject,eligibility,requirement,type,body',
+                    'type' => 'required|in:state,subject,eligibility,requirement,type,body,contact',
                 ]);
                 if ($request->type === 'state' || $request->type === 'subject' || $request->type === 'eligibility') {
                     $request->validate([
@@ -427,6 +449,10 @@ class FundingController extends Controller
                         break;
                     case('body'):
                         $funding->fundings_bodies_id = $request->datas_id ?? null;
+                        $funding->save();
+                        break;
+                    case('contact'):
+                        $funding->contacts_persons_id = $request->datas_id ?? null;
                         $funding->save();
                         break;
 

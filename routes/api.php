@@ -86,6 +86,8 @@ Route::group(['middleware' => 'log.entry'], function () {
 
         require __DIR__ . '/v1/measures.php';
 
+        require __DIR__ . '/v1/externalVideos.php';
+
     });
 });
 

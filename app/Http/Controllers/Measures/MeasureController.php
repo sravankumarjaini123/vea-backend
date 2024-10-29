@@ -83,19 +83,24 @@ class MeasureController extends Controller
         $result_array = array();
         if (!empty($measures)) {
             foreach ($measures as $measure) {
+                // Processors
                 if ($measure->measures_processors_id != null) {
                     $measure_processor_name = $measure->processor->name;
                 }
+                // Categories
                 if ($measure->measures_categories_id != null) {
                     $measure_category_name = $measure->category->name;
                 }
+                // Types
                 if ($measure->measures_types_id != null) {
                     $measure_type_name = $measure->type->name;
                 }
+                // Industries Sectors
                 if ($measure->industries_sectors_id != null) {
                     $industries_sectors_name = $measure->industrySector->name;
                     $industries_sectors_group_name = $measure->industrySector->industryGroup->name;
                 }
+                // Contact Persons
                 if ($measure->contacts_persons_id != null) {
                     if ($measure->contact->partners_id != null) {
                         $contact_person_partner_name = $measure->contact->company->name;
