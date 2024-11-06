@@ -13,14 +13,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('external_videos', 'type')) {
-            Schema::table('external_videos', function (Blueprint $table) {
-                $table->string('type')->default('video')->after('id');
-                $table->unsignedBigInteger('file_id')->nullable()->after('is_active');
+        if (Schema::hasTable('external_videos')) {
+            if (!Schema::hasColumn('external_videos', 'type')) {
+                Schema::table('external_videos', function (Blueprint $table) {
+                    $table->string('type')->default('video')->after('id');
+                    $table->unsignedBigInteger('file_id')->nullable()->after('is_active');
 
-                $table->foreign('file_id')->references('id')->on('folders_files')
-                    ->onDelete('cascade')->onUpdate('cascade');
-            });
+                    $table->foreign('file_id')->references('id')->on('folders_files')
+                        ->onDelete('cascade')->onUpdate('cascade');
+                });
+            }
         }
 
         if (Schema::hasTable('external_videos')) {
