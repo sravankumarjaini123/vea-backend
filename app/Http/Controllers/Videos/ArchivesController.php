@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Videos;
 
 use App\Http\Controllers\Controller;
-use App\Models\ExternalVideos;
+use App\Models\Archives;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Nette\Schema\ValidationException;
 use Exception;
 
-class ExternalVideosController extends Controller
+class ArchivesController extends Controller
 {
 
     /**
@@ -22,11 +22,11 @@ class ExternalVideosController extends Controller
     public function index(Request $request):JsonResponse
     {
         try {
-            $videos = DB::table('external_videos');
+            $videos = DB::table('archives');
             if ($request->is_active != null) {
-                $videos = $videos->where('is_active', '=', $request->is_active)->get();
+                $videos = $videos->where('is_active', '=', $request->is_active)->orderBy('date_added', 'DESC')->get();
             } else {
-                $videos = $videos->get();
+                $videos = $videos->orderBy('date_added', 'DESC')->get();
             }
             $query = $this->getExternalVideoDetails($videos);
             return response()->json([
@@ -43,19 +43,30 @@ class ExternalVideosController extends Controller
         }
     } // End Function
 
-    public function getExternalVideoDetails($videos):array
+    public function getExternalVideoDetails($archives):array
     {
         $result_array = array();
-        if (!empty($videos)) {
-            foreach ($videos as $video) {
+        if (!empty($archives)) {
+            foreach ($archives as $archive) {
+                $archive_elo = Archives::where('id', $archive->id)->first();
+                if ($archive->type === 'file') {
+                    if ($archive->file_id != null) {
+                        $file_path = $archive_elo->file->file_path;
+                    } else {
+                        continue;
+                    }
+                }
                 $result_array[] = [
-                    'id' => $video->id,
-                    'title' => $video->title,
-                    'url' => $video->url,
-                    'is_active' => $video->is_active,
-                    'date_added' => $video->date_added,
-                    'created_at' => $video->created_at,
-                    'source' => $video->source,
+                    'id' => $archive->id,
+                    'type' => $archive->type,
+                    'title' => $archive->title,
+                    'url' => $archive->url,
+                    'file_id' => $archive->file_id,
+                    'file_path' => $file_path ?? null,
+                    'is_active' => $archive->is_active,
+                    'date_added' => $archive->date_added,
+                    'created_at' => $archive->created_at,
+                    'source' => $archive->source,
                 ];
             }
         }
@@ -72,15 +83,26 @@ class ExternalVideosController extends Controller
     {
         try {
             $request->validate([
+                'type' => 'required|in:video,file',
                 'title' => 'required|string',
-                'url' => 'required',
                 'date_added' => 'required|date_format:Y-m-d',
                 'is_active' => 'required|boolean'
             ]);
+            if ($request->type === 'file') {
+                $request->validate([
+                    'file_id' => 'required',
+                ]);
+            } else {
+                $request->validate([
+                    'url' => 'required',
+                ]);
+            }
 
-            ExternalVideos::insert([
+            Archives::insert([
                 'title' => $request->title,
-                'url' => $request->url,
+                'type' => $request->type,
+                'file_id' => $request->file_id,
+                'url' => $request->url ?? null,
                 'source' => $request->source ?? null,
                 'date_added' => $request->date_added,
                 'is_active' => $request->is_active ?? 1,
@@ -89,7 +111,7 @@ class ExternalVideosController extends Controller
 
             return response()->json([
                 'status' => 'Success',
-                'message' => 'External Video is added successfully',
+                'message' => 'Archive is added successfully',
             ],200);
 
         } catch (ValidationException $exception)
@@ -110,8 +132,8 @@ class ExternalVideosController extends Controller
     public function show($id):JsonResponse
     {
         try {
-            if (ExternalVideos::where('id',$id)->exists()){
-                $video = ExternalVideos::where('id',$id)->first();
+            if (Archives::where('id',$id)->exists()){
+                $video = Archives::where('id',$id)->first();
                 return response()->json([
                     'data' => $video,
                     'message' => 'Success',
@@ -142,16 +164,28 @@ class ExternalVideosController extends Controller
     public function update(Request $request, $id):JsonResponse
     {
         try {
-            if (ExternalVideos::where('id', $id)->exists()) {
+            if (Archives::where('id', $id)->exists()) {
                 $request->validate([
+                    'type' => 'required|in:file,video',
                     'title' => 'required|string',
-                    'url' => 'required',
                     'date_added' => 'required|date_format:Y-m-d',
                     'is_active' => 'required|boolean'
                 ]);
 
-                ExternalVideos::where('id', $id)->update([
+                if ($request->type === 'file') {
+                    $request->validate([
+                        'file_id' => 'required',
+                    ]);
+                } else {
+                    $request->validate([
+                        'url' => 'required',
+                    ]);
+                }
+
+                Archives::where('id', $id)->update([
                     'title' => $request->title,
+                    'type' => $request->type,
+                    'file_id' => $request->file_id,
                     'url' => $request->url,
                     'source' => $request->source ?? null,
                     'date_added' => $request->date_added,
@@ -161,7 +195,7 @@ class ExternalVideosController extends Controller
 
                 return response()->json([
                     'status' => 'Success',
-                    'message' => 'External Video is updated successfully',
+                    'message' => 'Archive is updated successfully',
                 ], 200);
             } else{
                 return response()->json([
@@ -188,12 +222,12 @@ class ExternalVideosController extends Controller
     public function destroy($id):JsonResponse
     {
         try {
-            if (ExternalVideos::where('id',$id)->exists()){
-                ExternalVideos::where('id',$id)->delete();
+            if (Archives::where('id',$id)->exists()){
+                Archives::where('id',$id)->delete();
 
                 return response()->json([
                     'status' => 'Success',
-                    'message' => 'The External Video is deleted successfully',
+                    'message' => 'The Archive is deleted successfully',
                 ],200);
 
             }else{
@@ -220,15 +254,15 @@ class ExternalVideosController extends Controller
     public function massDelete(Request $request):JsonResponse
     {
         try {
-            if (!empty($request->videos_id)) {
-                foreach ($request->videos_id as $video_id) {
-                    $video = ExternalVideos::findOrFail($video_id);
-                    $video->delete();
+            if (!empty($request->archives_id)) {
+                foreach ($request->archives_id as $archive_id) {
+                    $archive = Archives::findOrFail($archive_id);
+                    $archive->delete();
                 }
 
                 return response()->json([
                     'status' => 'Success',
-                    'message' => 'The External Videos are deleted successfully',
+                    'message' => 'The Archives are deleted successfully',
                 ], 200);
             } else {
                 return response()->json([
