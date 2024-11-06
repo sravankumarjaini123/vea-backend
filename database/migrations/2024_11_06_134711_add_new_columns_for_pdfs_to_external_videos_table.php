@@ -28,7 +28,7 @@ return new class extends Migration
         }
 
         if (!Resources::where('slug', 'archives')->exists()) {
-            DB::table('resources')->where('slug', 'archives')->update([
+            DB::table('resources')->where('slug', 'external-videos')->update([
                 'name' => 'Archives',
                 'slug' => 'archives'
             ]);
