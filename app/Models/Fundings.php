@@ -59,4 +59,12 @@ class Fundings extends Model
     {
         return $this->belongsTo(FundingsBodies::class, 'fundings_bodies_id');
     }
+
+    /**
+     * Get the Contact Person of the Measure
+     */
+    public function contact()
+    {
+        return $this->belongsTo(User::class, 'contacts_persons_id');
+    }
 }
