@@ -22,6 +22,8 @@ class AuthorsController extends Controller
     public function index():JsonResponse
     {
         try {
+
+
             $query = Authors::all()->sortBy('display_order');
             $result_authors = $this->getAuthorDetails($query);
 
