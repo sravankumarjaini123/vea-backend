@@ -1,0 +1,43 @@
+client scripts for postman
+
+var jsonResponse = pm.response.json();
+if (jsonResponse.clientDetails.id === 2){
+    pm.environment.set("client_id", jsonResponse.clientDetails.id);
+    pm.environment.set("client_secret", jsonResponse.clientDetails.secret);
+} else if (jsonResponse.clientDetails.id === 3){
+    pm.environment.set("app_client_id", jsonResponse.clientDetails.id);
+    pm.environment.set("app_client_secret", jsonResponse.clientDetails.secret);
+}
+
+client headers
+
+Content-Type:multipart/form-data
+Accept:application/json
+
+
+
+
+Login scripts
+
+const jsonResponse = pm.response.json();
+pm.environment.set("access_token", "Bearer " + jsonResponse.tokenDetails.access_token);
+pm.environment.set("access_token_at", new Date());
+pm.environment.set("refresh_token", jsonResponse.tokenDetails.refresh_token);
+
+Login Headers
+
+Content-Type:multipart/form-data
+Accept:application/json
+
+
+
+
+
+credentials
+
+welcome@vea.de
+password
+
+
+
+
