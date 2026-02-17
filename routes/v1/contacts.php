@@ -52,7 +52,7 @@ Route::group(['prefix' => 'contact'],function(){
 
         // Route::post('update/{id}', [ContactController::class, 'updateAttachedCompany'])->name('contact.company.update')->middleware(['role:contacts,3']);
 
-        Route::post('remove/{id}', [ContactController::class, 'removeAttachedCompany'])->name('contact.company.delete')->middleware(['role:contacts,3']);
+        Route::post('remove/{id}', [ContactController::class, 'removeAttachedCompany'])->name('contact.company.delette')->middleware(['role:contacts,3']);
 
     });
     /* END -- COMPANY ADDRESS */
@@ -74,7 +74,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
         Route::post('sendInfo/{id}', [UserController::class, 'sendAccountInfo'])->name('contact.send.info')->middleware(['role:users,3']);
 
-        Route::post('state/{id}', [ContactController::class, 'updateState'])->name('contact.update.block')->middleware(['role:contacts,3']);
+        Route::post('state/{id}', [ContactController::class, 'updateState'])->name('contact.update.blocks')->middleware(['role:contacts,3']);
 
         Route::post('verification/email/{id}', [ContactController::class, 'emailWithCodeConfirmation'])->name('contact.update.block')->middleware(['role:contacts,1']);
 

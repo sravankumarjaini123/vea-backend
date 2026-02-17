@@ -35,7 +35,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     Route::post('legalTexts/{version_id}',[LegalTextController::class, 'update'])->name('legalTexts.update')->middleware(['role:legal-texts,3']);
 
-    Route::post('legalTexts/settings/create',[LegalTextController::class, 'addSettings'])->name('legalTexts.add.settings')->middleware(['role:legal-texts,3']);
+    Route::post('legalTexts/settings/create',[LegalTextController::class, 'addSettings'])->name('legalTexts.add.setttings')->middleware(['role:legal-texts,3']);
 
     Route::post('legalTexts/settings/delete/{setting_id}',[LegalTextController::class, 'deleteSettings'])->name('legalTexts.add.settings')->middleware(['role:legal-texts,3']);
 

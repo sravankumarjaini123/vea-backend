@@ -19,7 +19,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'linkedIns'], function (
 
     Route::get('{id}',[LinkedInController::class, 'show'])->name('linkedIn.show')->middleware(['role:linkedin,1']);
 
-    Route::post('{id}',[LinkedInController::class, 'update'])->name('linkedIn.show')->middleware(['role:linkedin,3']);
+    Route::post('{id}',[LinkedInController::class, 'update'])->name('linkedIn.update')->middleware(['role:linkedin,3']);
 
     Route::get('authorizeURL/{id}',[LinkedInController::class, 'getAuthorizationURL'])->name('linkedIn.authorizeURL');
 
@@ -29,7 +29,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'linkedIns'], function (
 
     Route::post('posts/share/{id}/{user_id}',[LinkedInController::class, 'sharePosts'])->name('linkedIn.share')->middleware(['role:post,3']);
 
-    Route::post('posts/reShare/{id}/{user_id}',[LinkedInController::class, 'reSharePosts'])->name('linkedIn.share')->middleware(['role:post,3']);
+    Route::post('posts/reShare/{id}/{user_id}',[LinkedInController::class, 'reSharePosts'])->name('linkedIn.reshare')->middleware(['role:post,3']);
 
     Route::post('posts/share/update/{id}/{user_id}',[LinkedInController::class, 'updateSharesPosts'])->name('linkedIn.share.update')->middleware(['role:post,3']);
 

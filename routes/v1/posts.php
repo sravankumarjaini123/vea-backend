@@ -52,7 +52,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
         Route::post('files/{id}',[PostController::class, 'updateFiles'])->name('posts.files')->middleware(['role:posts,3']);
 
-        Route::post('status/{id}',[PostController::class, 'updateStatus'])->name('posts.status')->middleware(['role:posts,3']);
+        Route::post('status/{id}',[PostController::class, 'updateStatus'])->name('posts.update.status')->middleware(['role:posts,3']);
 
         Route::post('topPost/{id}',[PostController::class, 'updateTopPost'])->name('posts.topPost')->middleware(['role:posts,3']);
 
@@ -68,11 +68,13 @@ Route::group(['middleware' => ['auth:api']], function () {
         /* BEGIN -- POSTS - WORDPRESS */
         Route::post('channels/attach/{id}',[PostsSyncController::class, 'postsChannelsAttach'])->name('posts.attach.wordpress')->middleware(['role:posts,3']);
 
-        Route::post('channels/detach/{id}',[PostsSyncController::class, 'postsChannelsDetach'])->name('posts.attach.wordpress')->middleware(['role:posts,3']);
+        Route::post('channels/detach/{id}',[PostsSyncController::class, 'postsChannelsDetach'])->name('posts.detach.wordpress')->middleware(['role:posts,3']);
+
 
         Route::post('channels/sync',[PostsSyncController::class, 'postsChannelsSync'])->name('posts.wordpress.sync')->middleware(['role:posts,3']);
 
-        Route::post('channels/sync/{id}',[PostsSyncController::class, 'postsChannelsSyncById'])->name('posts.wordpress.sync')->middleware(['role:posts,3']);
+        Route::post('channels/sync/{id}',[PostsSyncController::class, 'postsChannelsSyncById'])->name('posts.wordpress.syncById')->middleware(['role:posts,3']);
+
 
         Route::post('channels/callbackURL/{id}',[PostsSyncController::class, 'getShareableURL'])->name('posts.shareable.url')->middleware(['role:posts,3']);
         /* END -- POSTS - WORDPRESS */

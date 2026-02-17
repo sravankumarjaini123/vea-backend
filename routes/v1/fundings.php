@@ -30,7 +30,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'fundings'], function ()
 
     Route::post('{id}',[FundingController::class, 'update'])->name('fundings.updateGeneral')->middleware(['role:funding,3']);
 
-    Route::post('masterData/{id}',[FundingController::class, 'updateMasterData'])->name('fundings.updateGeneral')->middleware(['role:funding,3']);
+    Route::post('masterData/{id}',[FundingController::class, 'updateMasterData'])->name('fundings.updateMasterData')->middleware(['role:funding,3']);
 
 
     /* END -- FUNDING BODIES */

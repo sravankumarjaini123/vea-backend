@@ -20,7 +20,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'emails'], function () {
 
     Route::get('templates', [EmailTemplateController::class, 'index'])->name('emails.templates.index')->middleware(['role:emails,1']);
 
-    Route::get('', [EmailController::class, 'indexEmails'])->name('emails.index')->middleware(['role:emails,1']);
+    Route::get('', [EmailController::class, 'indexEmails'])->name('emails.indexx')->middleware(['role:emails,1']);
 
     Route::get('settings', [EmailSettingsController::class, 'indexSettings'])->name('emails.index')->middleware(['role:emails,1']);
 
@@ -34,7 +34,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'emails'], function () {
 
     Route::get('templates/{id}', [EmailTemplateController::class, 'show'])->name('emails.templates.show')->middleware(['role:emails,1']);
 
-    Route::post('settings', [EmailSettingsController::class, 'updateSettings'])->name('emails.settings.update')->middleware(['role:emails,3']);
+    Route::post('update/settings', [EmailSettingsController::class, 'updateSettings'])->name('emails.settings.update')->middleware(['role:emails,3']);
 
     Route::post('templates/massDelete', [EmailTemplateController::class, 'massDelete'])->name('emails.templates.massDestroy')->middleware(['role:emails,4']);
 

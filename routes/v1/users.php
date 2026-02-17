@@ -25,7 +25,7 @@ Route::group(['middleware' => config('fortify.middleware', ['web']),'prefix' => 
 
     Route::post('twoFactorAuth/verify/{id}',[TwoFactorController::class, 'verify'])->name('2FA.verify');
 
-    Route::post('loginAfter2FA/{id}',[AuthenticationController::class, 'loginAfter2FA'])->name('2FA.verify');
+    Route::post('loginAfter2FA/{id}',[AuthenticationController::class, 'loginAfter2FA'])->name('2FA.after.login');
 
 });
 
@@ -44,7 +44,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'user'],function(){
 
     Route::post('updatePassword/{id}', [UserController::class, 'updatePassword'])->name('user.update-password')->middleware(['role:users,3']);
 
-    Route::post('personal/{id}', [UserController::class, 'updatePersonal'])->name('user.update-password')->middleware(['role:users,3']);
+    Route::post('personal/{id}', [UserController::class, 'updatePersonal'])->name('user.update-personal')->middleware(['role:users,3']);
 
     Route::post('role/{id}', [UserController::class, 'updateUserRoles'])->name('users.role.update')->middleware(['role:users,2']);
 
@@ -79,5 +79,5 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     Route::get('user/notifications/{id}', [UserController::class, 'notifications'])->name('users.notifications');
 
-    Route::delete('users/{id}', [UserController::class, 'destroy'])->name('users.destroy')->middleware(['role:users,4']);
+    Route::delete('users/{id}', [UserController::class, 'destroy'])->name('users.destroys')->middleware(['role:users,4']);
 });
