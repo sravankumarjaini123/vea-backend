@@ -1,0 +1,27 @@
+﻿
+   INFO  Caching the framework bootstrap files.  
+
+  config ............................. 50ms DONE
+  routes ............................. 31ms FAIL
+
+   LogicException 
+
+  Unable to prepare route [api/v1/fundings/masterData/{id}] for serialization. Another route has already been assigned name [fundings.updateGeneral].
+
+  at vendor\laravel\framework\src\Illuminate\Routing\AbstractRouteCollection.php:247
+    243Γûò             $route->name($this->generateRouteName());
+    244Γûò 
+    245Γûò             $this->add($route);
+    246Γûò         } elseif (! is_null($symfonyRoutes->get($name))) {
+  Γ₧£ 247Γûò             throw new LogicException("Unable to prepare route [{$route->uri}] for serialization. Another route has already been assigned name [{$name}].");
+    248Γûò         }
+    249Γûò 
+    250Γûò         $symfonyRoutes->add($route->getName(), $route->toSymfonyRoute());
+    251Γûò
+
+  1   vendor\laravel\framework\src\Illuminate\Routing\AbstractRouteCollection.php:208
+      Illuminate\Routing\AbstractRouteCollection::addToSymfonyRoutesCollection(Object(Symfony\Component\Routing\RouteCollection), Object(Illuminate\Routing\Route))
+
+  2   vendor\laravel\framework\src\Illuminate\Routing\RouteCollection.php:246
+      Illuminate\Routing\AbstractRouteCollection::toSymfonyRouteCollection()
+

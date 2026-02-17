@@ -19,9 +19,9 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'twitters'], function ()
 
     Route::get('users/shared/accounts',[TwitterController::class, 'showShareableAccounts'])->name('twitter.show.shareableAccounts')->middleware(['role:twitter,1']);
 
-    Route::get('authorizeURL/{id}',[TwitterController::class, 'getAuthorizationURL'])->name('twitter.show');
+    Route::get('authorizeURL/{id}',[TwitterController::class, 'getAuthorizationURL'])->name('twitter.authorizeURL');
 
-    Route::get('metrics/{id}/{user_id}',[TwitterController::class, 'getMetrics'])->name('twitter.show');
+    Route::get('metrics/{id}/{user_id}',[TwitterController::class, 'getMetrics'])->name('twitter.metrics');
 
     Route::post('', [TwitterController::class, 'store'])->name('twitter.store')->middleware(['role:twitter,2']);
 
@@ -35,11 +35,11 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'twitters'], function ()
 
     Route::post('refreshToken/{id}', [TwitterController::class, 'generateRefreshToken'])->name('twitter.refresh.token')->middleware(['role:twitter,3']);
 
-    Route::post('posts/tweet/delete/{id}', [TwitterController::class, 'deleteTweetsPosts'])->name('twitter.tweet.post')->middleware(['role:posts,3']);
+    Route::post('posts/tweet/delete/{id}', [TwitterController::class, 'deleteTweetsPosts'])->name('twitter.delete.post')->middleware(['role:posts,3']);
 
     Route::post('users/{id}/{user_id}', [TwitterController::class, 'authorizeUserAccessToken'])->name('twitter.user.authorize');
 
-    Route::post('users/existing/{id}/{user_id}', [TwitterController::class, 'authenticateExistingUser'])->name('twitter.user.shareable.password');
+    Route::post('users/existing/{id}/{user_id}', [TwitterController::class, 'authenticateExistingUser'])->name('twitter.user.authenticate.password');
 
     Route::delete('users/disconnect/{id}', [TwitterController::class, 'disconnectUser'])->name('twitter.disconnect.user');
 

@@ -22,6 +22,7 @@ class RegistrationController extends Controller
      */
     public function register(Request $request):JsonResponse
     {
+        // dd($request->all());
         try {
             $request->validate([
                 'salutation_id' => 'required|integer',

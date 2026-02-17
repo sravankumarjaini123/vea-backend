@@ -93,7 +93,7 @@ Route::group(['middleware' => 'log.entry'], function () {
 
 Route::group(['middleware' => config('fortify.middleware', ['web']),'prefix' => 'v1/client'], function () {
 
-    Route::get('token', [TokensController::class, 'index'])->name('api.client.token');
+    Route::post('token', [TokensController::class, 'index'])->name('api.client.token');
 
     Route::get('countries', [CountryController::class , 'index'])->name('api.countries.index');
 

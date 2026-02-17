@@ -21,6 +21,7 @@ class TokensController extends Controller
      */
     public function index(Request $request):JsonResponse
     {
+        // dd($request->all());
         try {
             $request->validate([
                 'channel' => 'required|in:backend,web',
